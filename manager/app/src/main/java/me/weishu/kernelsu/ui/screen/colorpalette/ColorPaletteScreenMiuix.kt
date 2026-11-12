@@ -183,7 +183,7 @@ fun ColorPaletteScreenMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),,
+                            .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                         SwitchPreference(
@@ -290,7 +290,7 @@ fun ColorPaletteScreenMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),,
+                            .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -366,7 +366,7 @@ fun ColorPaletteScreenMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),,
+                            .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -470,7 +470,7 @@ fun ColorPaletteScreenMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),,
+                            .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                         var linesValue by remember(uiState.moduleDescriptionMaxLines) { mutableIntStateOf(uiState.moduleDescriptionMaxLines) }
