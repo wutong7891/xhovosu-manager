@@ -84,7 +84,7 @@ internal fun ScriptRunScreenMiuix(
     val enableBlur = LocalEnableBlur.current
     val scrollBehavior = MiuixScrollBehavior()
     val backdrop = rememberBlurBackdrop(enableBlur)
-    val barColor = if (backdrop != null) Color.Transparent else colorScheme.surface
+    val barColor = if (backdrop != null) Color.Transparent else colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)
 
     Scaffold(
         topBar = {
