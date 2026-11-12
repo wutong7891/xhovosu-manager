@@ -244,6 +244,12 @@
     <string name="module_undo_uninstall_success">Successfully canceled uninstall of %s</string>
     <string name="module_undo_uninstall_failed">Failed to undo uninstall: %s</string>
     <string name="group_contains_apps">Contains %d apps</string>
+    <string name="settings_bg_intensity">Background intensity</string>
+    <string name="settings_bg_intensity_summary">How strong the background image or video looks</string>
+    <string name="settings_ui_opacity">UI opacity</string>
+    <string name="settings_ui_opacity_summary">Lower values make the interface more see-through</string>
+    <string name="settings_snow_speed">Snow speed</string>
+    <string name="settings_snow_speed_summary">How fast the snow falls</string>
     <string name="settings_background">Custom background</string>
     <string name="settings_background_summary">Pick an image used behind the whole app</string>
     <string name="settings_background_none">Not set</string>
