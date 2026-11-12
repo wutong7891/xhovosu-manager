@@ -87,11 +87,11 @@ class SettingsRepositoryImpl : SettingsRepository {
         set(value) = prefs.edit { putBoolean("enable_blur", value) }
 
     override var enableFloatingBottomBar: Boolean
-        get() = prefs.getBoolean("enable_floating_bottom_bar", false)
+        get() = prefs.getBoolean("enable_floating_bottom_bar", true)
         set(value) = prefs.edit { putBoolean("enable_floating_bottom_bar", value) }
 
     override var enableFloatingBottomBarBlur: Boolean
-        get() = prefs.getBoolean("enable_floating_bottom_bar_blur", false)
+        get() = prefs.getBoolean("enable_floating_bottom_bar_blur", true)
         set(value) = prefs.edit { putBoolean("enable_floating_bottom_bar_blur", value) }
 
     override var enableNavigationBadge: Boolean
@@ -164,6 +164,10 @@ class SettingsRepositoryImpl : SettingsRepository {
                 putBoolean("auto_jailbreak", value)
             }
         }
+
+    override var nightBackgroundUri: String
+        get() = prefs.getString("night_background_uri", "").orEmpty()
+        set(value) = prefs.edit { putString("night_background_uri", value) }
 
     override var useSoftReboot: Boolean
         get() = prefs.getBoolean(KEY_USE_SOFT_REBOOT, false)
