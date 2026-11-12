@@ -102,6 +102,7 @@ import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.basic.CardDefaults
 
 @Composable
 fun SuperUserPagerMiuix(
@@ -506,7 +507,8 @@ private fun SimpleAppItem(
         )
         Card(
             modifier = Modifier
-                .padding(start = 6.dp, end = 12.dp, bottom = 6.dp)
+                .padding(start = 6.dp, end = 12.dp, bottom = 6.dp),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
             BasicComponent(
                 title = app.label,
@@ -556,8 +558,9 @@ private fun GroupItem(
         onClick = onClickPrimary,
         onLongPress = if (group.apps.size > 1) onToggleExpand else null,
         showIndication = true,
-        insideMargin = PaddingValues(start = 10.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-    ) {
+        insideMargin = PaddingValues(start = 10.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
