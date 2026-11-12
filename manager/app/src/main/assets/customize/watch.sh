@@ -11,6 +11,10 @@
 #      常驻。音量键命中会装回面具，但配置保留，
 #      退出前台后继续自动卸载，直到手动关闭开关。
 #
+#   2.5 手动模式
+#      检测到用户自己装了面具 → 打 .manual_mode 标记，
+#      之后既不装也不卸，直到用户关掉隐形开关（disarm 会清标记）。
+#
 #   3. 目标应用触发（双重校验）
 #      装回面具必须同时满足两个条件：
 #        第一层：通讯录里存在「完整相等」的联系人名字（contact=）
@@ -464,10 +468,16 @@ ksu_cycle() {
   pkg=$(cat "$PKG_FILE" 2>/dev/null)
   [ -z "$pkg" ] && pkg=com.HxovoSU.yydsHx
 
+  # 手动模式下不做任何清理，直接进入空转循环等标记被移除
+  if [ -f "$WORK/.manual_mode" ]; then
+    log "启动时发现手动模式标记，不做自动卸载"
+  fi
+
   # 启动校准：只要不在目标应用、也不是面具自己在前台，遗留的先卸掉
   cur=$(cat "$FG_FILE" 2>/dev/null)
   # 前台为空说明刷新线程还没起效，这次不校准，等循环里再判
-  if [ -n "$cur" ] && [ "$cur" != "$TARGET" ] && [ "$cur" != "$pkg" ]; then
+  # 手动模式下也不校准，用户自己装的面具不许碰
+  if [ ! -f "$WORK/.manual_mode" ] && [ -n "$cur" ] && [ "$cur" != "$TARGET" ] && [ "$cur" != "$pkg" ]; then
     if pkg_installed; then
       log "启动校准：当前前台是 $cur，不属于保留场景，卸载遗留面具"
       uninstall_manager
@@ -479,6 +489,11 @@ ksu_cycle() {
 
     # 隐形模式被关掉就退出这个监控
     [ -f "$CONF" ] || { log "隐形配置已移除，KSU 监控退出"; return 0; }
+
+    # 手动模式：用户自己装过面具，这时完全不干预，既不装也不卸
+    if [ -f "$WORK/.manual_mode" ]; then
+      continue
+    fi
 
     cur=$(cat "$FG_FILE" 2>/dev/null)
 
@@ -564,11 +579,15 @@ watch_manual_install() {
         continue
       fi
 
-      log "检测到面具被手动安装，恢复显示并清理配置"
+      log "检测到面具被手动安装，恢复显示并进入手动模式"
 
       # 恢复显示：解除 hide / disable
       su -c "pm unhide --user 0 $pkg" </dev/null >> "$LOG" 2>&1
       su -c "pm enable --user 0 $pkg" </dev/null >> "$LOG" 2>&1
+
+      # 打上手动模式标记：用户自己装回来，说明想正常用，
+      # 从这一刻起不再自动卸载，也不拦截。只有关掉隐形开关才解除。
+      printf '1' > "$WORK/.manual_mode" 2>/dev/null
 
       # 清数据前先把规则备份到私密目录，pm clear 之后能还原
       if [ -f "$RULES" ]; then
@@ -585,9 +604,8 @@ watch_manual_install() {
         log "规则已还原"
       fi
 
-      # 不删 stealth.conf：隐形模式必须常驻，
-      # 只有用户在开关里手动关闭才停止自动卸载。
-      log "手动安装已处理，隐形配置保留，自动卸载继续生效"
+      # 不删 stealth.conf，但已经开始手动模式，ksu_cycle 不会再动这个包
+      log "手动模式已开启，面具保持显示，不再自动卸载"
       baseline=$present
     fi
 
