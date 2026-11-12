@@ -275,9 +275,9 @@ private fun StatusCard(
                         colors = CardDefaults.defaultColors(
                             // 半透明，让背景图层透出来，同时保住文字可读性
                             color = when {
-                                isDynamicColor -> colorScheme.secondaryContainer.copy(alpha = 0.55f)
-                                isInDarkTheme() -> Color(0xFF1A3825).copy(alpha = 0.55f)
-                                else -> Color(0xFFDFFAE4).copy(alpha = 0.55f)
+                                isDynamicColor -> colorScheme.secondaryContainer.copy(alpha = 0.42f)
+                                isInDarkTheme() -> Color(0xFF1A3825).copy(alpha = 0.42f)
+                                else -> Color(0xFFDFFAE4).copy(alpha = 0.42f)
                             }
                         ),
                         onClick = {
@@ -444,7 +444,7 @@ private fun SupportLinks(
 
     Card(
         modifier = modifier,
-        colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.55f)),
+        colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
     ) {
         ArrowPreference(
             title = stringResource(R.string.home_support_title),
@@ -538,7 +538,7 @@ private fun InfoCard(
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.55f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoText(
@@ -566,7 +566,7 @@ private fun InfoCard(
         }
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.55f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoText(
