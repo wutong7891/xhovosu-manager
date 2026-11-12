@@ -87,6 +87,9 @@ fun SettingPager(
         onOpenAbout = { navigator.push(Route.About) },
         onPickBackground = { backgroundPicker.launch(arrayOf("image/*")) },
         onClearBackground = { viewModel.setNightBackground("") },
+        onSetBackgroundIntensity = viewModel::setBackgroundIntensity,
+        onSetUiOpacity = viewModel::setUiOpacity,
+        onSetSnowSpeed = viewModel::setSnowSpeed,
     )
 
     when (LocalUiMode.current) {
