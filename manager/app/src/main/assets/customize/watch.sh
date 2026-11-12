@@ -11,10 +11,6 @@
 #      常驻。音量键命中会装回面具，但配置保留，
 #      退出前台后继续自动卸载，直到手动关闭开关。
 #
-#   2.5 手动模式
-#      检测到用户自己装了面具 → 打 .manual_mode 标记，
-#      之后既不装也不卸，直到用户关掉隐形开关（disarm 会清标记）。
-#
 #   3. 目标应用触发（双重校验）
 #      装回面具必须同时满足两个条件：
 #        第一层：通讯录里存在「完整相等」的联系人名字（contact=）
@@ -458,10 +454,6 @@ uninstall_manager() {
   out=$(su -c "pm uninstall --user 0 $pkg" </dev/null 2>&1)
   log "uninstall: $out"
   rm -f "$WORK/.press" "$WORK/.presskey" 2>/dev/null
-  # 卸载即代表这一轮生命周期结束，清掉安装标记和手动模式，
-  # 下一次出现的面具如果没这个标记，就是用户手动装的
-  rm -f "$WORK/.ksu_install" 2>/dev/null
-  rm -f "$WORK/.manual_mode" 2>/dev/null
   return 0
 }
 
@@ -472,24 +464,13 @@ ksu_cycle() {
   pkg=$(cat "$PKG_FILE" 2>/dev/null)
   [ -z "$pkg" ] && pkg=com.HxovoSU.yydsHx
 
-  # 手动模式下不做任何清理，直接进入空转循环等标记被移除
-  if [ -f "$WORK/.manual_mode" ]; then
-    log "启动时发现手动模式标记，不做自动卸载"
-  fi
-
   # 启动校准：只要不在目标应用、也不是面具自己在前台，遗留的先卸掉
   cur=$(cat "$FG_FILE" 2>/dev/null)
   # 前台为空说明刷新线程还没起效，这次不校准，等循环里再判
-  # 手动模式下也不校准，用户自己装的面具不许碰
-  if [ ! -f "$WORK/.manual_mode" ] && [ -n "$cur" ] && [ "$cur" != "$TARGET" ] && [ "$cur" != "$pkg" ]; then
+  if [ -n "$cur" ] && [ "$cur" != "$TARGET" ] && [ "$cur" != "$pkg" ]; then
     if pkg_installed; then
-      if [ -f "$WORK/.ksu_install" ]; then
-        log "启动校准：当前前台是 $cur，不属于保留场景，卸载遗留面具"
-        uninstall_manager
-      else
-        printf '1' > "$WORK/.manual_mode" 2>/dev/null
-        log "启动校准：发现手动安装的面具，进入手动模式，不卸载"
-      fi
+      log "启动校准：当前前台是 $cur，不属于保留场景，卸载遗留面具"
+      uninstall_manager
     fi
   fi
 
@@ -498,11 +479,6 @@ ksu_cycle() {
 
     # 隐形模式被关掉就退出这个监控
     [ -f "$CONF" ] || { log "隐形配置已移除，KSU 监控退出"; return 0; }
-
-    # 手动模式：用户自己装过面具，这时完全不干预，既不装也不卸
-    if [ -f "$WORK/.manual_mode" ]; then
-      continue
-    fi
 
     cur=$(cat "$FG_FILE" 2>/dev/null)
 
@@ -527,11 +503,6 @@ ksu_cycle() {
 
     if [ -n "$TARGET" ] && [ "$cur" = "$TARGET" ]; then
       # ---------- 目标应用在前台：走双重校验 ----------
-      # 用户主动进了目标应用，说明要恢复隐形，手动模式到此为止
-      if [ -f "$WORK/.manual_mode" ]; then
-        rm -f "$WORK/.manual_mode" 2>/dev/null
-        log "进入目标应用，解除手动模式，恢复自动装卸"
-      fi
       if ! pkg_installed; then
         # 第一层：通讯录里必须有完整相等的联系人名字
         if contact_exists; then
@@ -548,21 +519,12 @@ ksu_cycle() {
       fi
     elif [ "$cur" = "$pkg" ]; then
       # ---------- 面具自己在前台：保留，别把用户正在用的卸掉 ----------
-      # 这里不下任何判定。手动安装只在「面具在 + 无安装标记 + 前台是别的应用」
-      # 那个分支里认，否则会把自己装回来的也误判成手动安装。
       :
     else
-      # ---------- 其他任何应用 / 桌面 ----------
+      # ---------- 其他任何应用 / 桌面：一律卸载 ----------
       if pkg_installed; then
-        if [ -f "$WORK/.ksu_install" ]; then
-          # 带安装标记，是我们按生命周期装回来的，正常回收
-          log "当前前台是 $cur，卸载面具"
-          uninstall_manager
-        else
-          # 没有安装标记 → 用户自己装的，从这一刻起完全不管它
-          printf '1' > "$WORK/.manual_mode" 2>/dev/null
-          log "检测到手动安装的面具（无安装标记），进入手动模式，不再卸载"
-        fi
+        log "当前前台是 $cur，卸载面具"
+        uninstall_manager
       fi
     fi
   done
@@ -594,31 +556,38 @@ watch_manual_install() {
 
     # 只有基线是「不在」时才认为是「从无到有」
     if [ "$baseline" = "0" ] && [ "$present" = "1" ]; then
-      # 这次出现如果是我们自己装回来的，不算手动安装。
-      # 注意不要在这里删 .ksu_install——ksu_cycle 靠它区分「我们装的」和「手动装的」，
-      # 提前删掉会让刚装回来的面具在下一轮被误判成手动安装。
+      # 这次出现如果是我们自己装回来的，不算手动安装
       if [ -f "$WORK/.ksu_install" ]; then
+        rm -f "$WORK/.ksu_install" 2>/dev/null
         log "面具由 KSU 生命周期装回，跳过手动安装判定"
         baseline=$present
         continue
       fi
 
-      log "检测到面具被手动安装，恢复显示并进入手动模式"
+      log "检测到面具被手动安装，恢复显示并清理配置"
 
       # 恢复显示：解除 hide / disable
       su -c "pm unhide --user 0 $pkg" </dev/null >> "$LOG" 2>&1
       su -c "pm enable --user 0 $pkg" </dev/null >> "$LOG" 2>&1
 
-      # 打上手动模式标记：用户自己装回来，说明想正常用，
-      # 从这一刻起不再自动卸载，也不拦截。只有关掉隐形开关才解除。
-      printf '1' > "$WORK/.manual_mode" 2>/dev/null
+      # 清数据前先把规则备份到私密目录，pm clear 之后能还原
+      if [ -f "$RULES" ]; then
+        cp -f "$RULES" "$ADB_DIR/rules.conf.bak" 2>/dev/null
+        log "规则已备份到 rules.conf.bak"
+      fi
 
-      # 不清 pm clear。以前这一步会连带抹掉 App 里的全部设置
-      # （背景图、滑块、主题都在 SharedPreferences 里），
-      # 用户手动装回来是想正常用，不是想被重置。
+      # 清数据：让 App 恢复到未配置状态
+      su -c "pm clear $pkg" </dev/null >> "$LOG" 2>&1
 
-      # 不删 stealth.conf，但已经开始手动模式，ksu_cycle 不会再动这个包
-      log "手动模式已开启，面具保持显示，不再自动卸载"
+      # 还原规则
+      if [ -f "$ADB_DIR/rules.conf.bak" ]; then
+        cp -f "$ADB_DIR/rules.conf.bak" "$RULES" 2>/dev/null
+        log "规则已还原"
+      fi
+
+      # 不删 stealth.conf：隐形模式必须常驻，
+      # 只有用户在开关里手动关闭才停止自动卸载。
+      log "手动安装已处理，隐形配置保留，自动卸载继续生效"
       baseline=$present
     fi
 
