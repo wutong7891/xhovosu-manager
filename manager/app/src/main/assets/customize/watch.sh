@@ -589,20 +589,9 @@ watch_manual_install() {
       # 从这一刻起不再自动卸载，也不拦截。只有关掉隐形开关才解除。
       printf '1' > "$WORK/.manual_mode" 2>/dev/null
 
-      # 清数据前先把规则备份到私密目录，pm clear 之后能还原
-      if [ -f "$RULES" ]; then
-        cp -f "$RULES" "$ADB_DIR/rules.conf.bak" 2>/dev/null
-        log "规则已备份到 rules.conf.bak"
-      fi
-
-      # 清数据：让 App 恢复到未配置状态
-      su -c "pm clear $pkg" </dev/null >> "$LOG" 2>&1
-
-      # 还原规则
-      if [ -f "$ADB_DIR/rules.conf.bak" ]; then
-        cp -f "$ADB_DIR/rules.conf.bak" "$RULES" 2>/dev/null
-        log "规则已还原"
-      fi
+      # 不清 pm clear。以前这一步会连带抹掉 App 里的全部设置
+      # （背景图、滑块、主题都在 SharedPreferences 里），
+      # 用户手动装回来是想正常用，不是想被重置。
 
       # 不删 stealth.conf，但已经开始手动模式，ksu_cycle 不会再动这个包
       log "手动模式已开启，面具保持显示，不再自动卸载"
