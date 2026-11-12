@@ -108,7 +108,7 @@ fun ColorPaletteScreenMiuix(
     val enableBlurState = LocalEnableBlur.current
     val backdrop = rememberBlurBackdrop(enableBlurState)
     val blurActive = backdrop != null
-    val barColor = if (blurActive) Color.Transparent else colorScheme.surface
+    val barColor = if (blurActive) Color.Transparent else colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)
     val uiState = state.uiState
     val currentColorMode = state.currentColorMode
     val isDark = currentColorMode.isDark || currentColorMode.isSystem && isSystemInDarkTheme()
@@ -551,15 +551,15 @@ private fun ThemePreviewCardMiuix(
         specVersion = effectiveSpec,
     )
 
-    val bgColor = if (miuixMonet) dynamicCs.background else colorScheme.surface
+    val bgColor = if (miuixMonet) dynamicCs.background else colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)
     val textColor = if (miuixMonet) dynamicCs.onSurface else colorScheme.onBackground
     val accentCardColor = when {
         miuixMonet -> dynamicCs.secondaryContainer
         isDark -> Color(0xFF1A3825)
         else -> Color(0xFFDFFAE4)
     }
-    val cardColor = if (miuixMonet) dynamicCs.surfaceContainerHighest else colorScheme.surfaceVariant
-    val navBarColor = if (miuixMonet) dynamicCs.surfaceContainer else colorScheme.surface
+    val cardColor = if (miuixMonet) dynamicCs.surfaceContainerHighest else colorScheme.surfaceVariant.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)
+    val navBarColor = if (miuixMonet) dynamicCs.surfaceContainer else colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)
     val iconColor = if (miuixMonet) dynamicCs.primary else colorScheme.primary
     val navSelectedColor = colorScheme.onSurfaceContainer
     val navUnselectedColor = colorScheme.onSurfaceContainer.copy(alpha = 0.5f)
