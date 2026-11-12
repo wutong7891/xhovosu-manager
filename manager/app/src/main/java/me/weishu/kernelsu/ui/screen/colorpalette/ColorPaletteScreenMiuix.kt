@@ -184,7 +184,7 @@ fun ColorPaletteScreenMiuix(
                         modifier = Modifier
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         SwitchPreference(
                             title = stringResource(id = R.string.settings_monet),
@@ -291,7 +291,7 @@ fun ColorPaletteScreenMiuix(
                         modifier = Modifier
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             SwitchPreference(
@@ -367,7 +367,7 @@ fun ColorPaletteScreenMiuix(
                         modifier = Modifier
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                             SwitchPreference(
@@ -471,7 +471,7 @@ fun ColorPaletteScreenMiuix(
                         modifier = Modifier
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         var linesValue by remember(uiState.moduleDescriptionMaxLines) { mutableIntStateOf(uiState.moduleDescriptionMaxLines) }
                         BasicComponent(
