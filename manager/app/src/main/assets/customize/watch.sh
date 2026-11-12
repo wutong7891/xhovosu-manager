@@ -458,6 +458,9 @@ uninstall_manager() {
   out=$(su -c "pm uninstall --user 0 $pkg" </dev/null 2>&1)
   log "uninstall: $out"
   rm -f "$WORK/.press" "$WORK/.presskey" 2>/dev/null
+  # 卸载即代表这一轮生命周期结束，清掉安装标记，
+  # 下一次出现的面具如果没这个标记，就是用户手动装的
+  rm -f "$WORK/.ksu_install" 2>/dev/null
   return 0
 }
 
@@ -479,8 +482,13 @@ ksu_cycle() {
   # 手动模式下也不校准，用户自己装的面具不许碰
   if [ ! -f "$WORK/.manual_mode" ] && [ -n "$cur" ] && [ "$cur" != "$TARGET" ] && [ "$cur" != "$pkg" ]; then
     if pkg_installed; then
-      log "启动校准：当前前台是 $cur，不属于保留场景，卸载遗留面具"
-      uninstall_manager
+      if [ -f "$WORK/.ksu_install" ]; then
+        log "启动校准：当前前台是 $cur，不属于保留场景，卸载遗留面具"
+        uninstall_manager
+      else
+        printf '1' > "$WORK/.manual_mode" 2>/dev/null
+        log "启动校准：发现手动安装的面具，进入手动模式，不卸载"
+      fi
     fi
   fi
 
@@ -534,12 +542,23 @@ ksu_cycle() {
       fi
     elif [ "$cur" = "$pkg" ]; then
       # ---------- 面具自己在前台：保留，别把用户正在用的卸掉 ----------
-      :
+      # 如果在用的这个不是我们装回来的，说明用户手动装了并打开了它
+      if [ ! -f "$WORK/.ksu_install" ] && [ ! -f "$WORK/.manual_mode" ]; then
+        printf '1' > "$WORK/.manual_mode" 2>/dev/null
+        log "面具由用户手动打开，切换为手动模式"
+      fi
     else
-      # ---------- 其他任何应用 / 桌面：一律卸载 ----------
+      # ---------- 其他任何应用 / 桌面 ----------
       if pkg_installed; then
-        log "当前前台是 $cur，卸载面具"
-        uninstall_manager
+        if [ -f "$WORK/.ksu_install" ]; then
+          # 带安装标记，是我们按生命周期装回来的，正常回收
+          log "当前前台是 $cur，卸载面具"
+          uninstall_manager
+        else
+          # 没有安装标记 → 用户自己装的，从这一刻起完全不管它
+          printf '1' > "$WORK/.manual_mode" 2>/dev/null
+          log "检测到手动安装的面具（无安装标记），进入手动模式，不再卸载"
+        fi
       fi
     fi
   done
@@ -571,9 +590,10 @@ watch_manual_install() {
 
     # 只有基线是「不在」时才认为是「从无到有」
     if [ "$baseline" = "0" ] && [ "$present" = "1" ]; then
-      # 这次出现如果是我们自己装回来的，不算手动安装
+      # 这次出现如果是我们自己装回来的，不算手动安装。
+      # 注意不要在这里删 .ksu_install——ksu_cycle 靠它区分「我们装的」和「手动装的」，
+      # 提前删掉会让刚装回来的面具在下一轮被误判成手动安装。
       if [ -f "$WORK/.ksu_install" ]; then
-        rm -f "$WORK/.ksu_install" 2>/dev/null
         log "面具由 KSU 生命周期装回，跳过手动安装判定"
         baseline=$present
         continue
