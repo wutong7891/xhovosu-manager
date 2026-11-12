@@ -380,8 +380,9 @@ private fun StatusCard(
                             }
                         },
                         showIndication = !state.isLateLoadMode,
-                        pressFeedbackType = PressFeedbackType.Tilt
-                    ) {
+                        pressFeedbackType = PressFeedbackType.Tilt,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                         BasicComponent(
                             title = stringResource(R.string.home_not_installed),
                             summary = stringResource(R.string.home_click_to_install),
@@ -415,8 +416,9 @@ private fun StatusCard(
                         }
                     },
                     showIndication = !state.isLateLoadMode,
-                    pressFeedbackType = PressFeedbackType.Tilt
-                ) {
+                    pressFeedbackType = PressFeedbackType.Tilt,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                     BasicComponent(
                         title = stringResource(R.string.home_unsupported),
                         summary = stringResource(R.string.home_unsupported_reason),
