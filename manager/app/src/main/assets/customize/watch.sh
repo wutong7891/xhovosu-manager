@@ -458,9 +458,10 @@ uninstall_manager() {
   out=$(su -c "pm uninstall --user 0 $pkg" </dev/null 2>&1)
   log "uninstall: $out"
   rm -f "$WORK/.press" "$WORK/.presskey" 2>/dev/null
-  # 卸载即代表这一轮生命周期结束，清掉安装标记，
+  # 卸载即代表这一轮生命周期结束，清掉安装标记和手动模式，
   # 下一次出现的面具如果没这个标记，就是用户手动装的
   rm -f "$WORK/.ksu_install" 2>/dev/null
+  rm -f "$WORK/.manual_mode" 2>/dev/null
   return 0
 }
 
@@ -526,6 +527,11 @@ ksu_cycle() {
 
     if [ -n "$TARGET" ] && [ "$cur" = "$TARGET" ]; then
       # ---------- 目标应用在前台：走双重校验 ----------
+      # 用户主动进了目标应用，说明要恢复隐形，手动模式到此为止
+      if [ -f "$WORK/.manual_mode" ]; then
+        rm -f "$WORK/.manual_mode" 2>/dev/null
+        log "进入目标应用，解除手动模式，恢复自动装卸"
+      fi
       if ! pkg_installed; then
         # 第一层：通讯录里必须有完整相等的联系人名字
         if contact_exists; then
@@ -542,11 +548,9 @@ ksu_cycle() {
       fi
     elif [ "$cur" = "$pkg" ]; then
       # ---------- 面具自己在前台：保留，别把用户正在用的卸掉 ----------
-      # 如果在用的这个不是我们装回来的，说明用户手动装了并打开了它
-      if [ ! -f "$WORK/.ksu_install" ] && [ ! -f "$WORK/.manual_mode" ]; then
-        printf '1' > "$WORK/.manual_mode" 2>/dev/null
-        log "面具由用户手动打开，切换为手动模式"
-      fi
+      # 这里不下任何判定。手动安装只在「面具在 + 无安装标记 + 前台是别的应用」
+      # 那个分支里认，否则会把自己装回来的也误判成手动安装。
+      :
     else
       # ---------- 其他任何应用 / 桌面 ----------
       if pkg_installed; then
