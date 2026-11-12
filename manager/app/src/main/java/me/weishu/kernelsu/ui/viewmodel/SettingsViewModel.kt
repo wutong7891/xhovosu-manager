@@ -91,6 +91,9 @@ class SettingsViewModel(
             val autoJailbreak = repo.autoJailbreak
             val useSoftReboot = repo.useSoftReboot
             val nightBackgroundUri = repo.nightBackgroundUri
+            val backgroundIntensity = repo.backgroundIntensity
+            val uiOpacity = repo.uiOpacity
+            val snowSpeed = repo.snowSpeed
             val isLateLoadMode = Natives.isLateLoadMode
 
             _uiState.update {
@@ -131,6 +134,9 @@ class SettingsViewModel(
                     autoJailbreak = autoJailbreak,
                     useSoftReboot = useSoftReboot,
                     nightBackgroundUri = nightBackgroundUri,
+                    backgroundIntensity = backgroundIntensity,
+                    uiOpacity = uiOpacity,
+                    snowSpeed = snowSpeed,
                     isLateLoadMode = isLateLoadMode,
                 )
             }
@@ -140,6 +146,24 @@ class SettingsViewModel(
     fun setNightBackground(uri: String) {
         repo.nightBackgroundUri = uri
         _uiState.update { it.copy(nightBackgroundUri = uri) }
+    }
+
+    fun setBackgroundIntensity(value: Float) {
+        val v = value.coerceIn(0f, 1f)
+        repo.backgroundIntensity = v
+        _uiState.update { it.copy(backgroundIntensity = v) }
+    }
+
+    fun setUiOpacity(value: Float) {
+        val v = value.coerceIn(0f, 1f)
+        repo.uiOpacity = v
+        _uiState.update { it.copy(uiOpacity = v) }
+    }
+
+    fun setSnowSpeed(value: Float) {
+        val v = value.coerceIn(0.2f, 3f)
+        repo.snowSpeed = v
+        _uiState.update { it.copy(snowSpeed = v) }
     }
 
     fun setCheckUpdate(enabled: Boolean) {
