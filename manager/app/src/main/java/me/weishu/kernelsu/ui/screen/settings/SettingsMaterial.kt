@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.HideImage
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.Palette
@@ -171,6 +173,50 @@ fun SettingPagerMaterial(
                                 )
                             }
                         )
+                    }
+                }
+            )
+
+            // 自定义背景图
+            val backgroundItem = stringResource(id = R.string.settings_background)
+            val hasBackground = uiState.nightBackgroundUri.isNotBlank()
+            SegmentedColumn(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
+                content = buildList {
+                    add {
+                        SegmentedListItem(
+                            onClick = actions.onPickBackground,
+                            headlineContent = { Text(backgroundItem) },
+                            supportingContent = {
+                                Text(
+                                    if (hasBackground) {
+                                        stringResource(id = R.string.settings_background_set)
+                                    } else {
+                                        stringResource(id = R.string.settings_background_summary)
+                                    }
+                                )
+                            },
+                            leadingContent = { Icon(Icons.Filled.Image, backgroundItem) },
+                            trailingContent = {
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                            }
+                        )
+                    }
+                    if (hasBackground) {
+                        add {
+                            SegmentedListItem(
+                                onClick = actions.onClearBackground,
+                                headlineContent = {
+                                    Text(stringResource(id = R.string.settings_background_clear))
+                                },
+                                leadingContent = {
+                                    Icon(
+                                        Icons.Filled.HideImage,
+                                        stringResource(id = R.string.settings_background_clear)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             )
