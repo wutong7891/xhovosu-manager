@@ -1,5 +1,8 @@
 package me.weishu.kernelsu.ui.screen.settings
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
@@ -7,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,6 +31,22 @@ fun SettingPager(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val latestIsCurrentPage by rememberUpdatedState(isCurrentPage)
     val initialResumeHandled = rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // 选图后要把读取权限持久化，否则重启应用就再也读不到这张图
+    val backgroundPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+            }
+            viewModel.setNightBackground(uri.toString())
+        }
+    }
 
     LaunchedEffect(isCurrentPage) {
         if (isCurrentPage) {
@@ -65,6 +85,8 @@ fun SettingPager(
         onSetAutoJailbreak = viewModel::setAutoJailbreak,
         onSetUseSoftReboot = viewModel::setUseSoftReboot,
         onOpenAbout = { navigator.push(Route.About) },
+        onPickBackground = { backgroundPicker.launch(arrayOf("image/*")) },
+        onClearBackground = { viewModel.setNightBackground("") },
     )
 
     when (LocalUiMode.current) {
