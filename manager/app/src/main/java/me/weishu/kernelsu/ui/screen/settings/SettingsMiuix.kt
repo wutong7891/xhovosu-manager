@@ -651,6 +651,7 @@ private fun SliderRow(
             modifier = Modifier.padding(top = 1.dp, bottom = 4.dp),
         )
         Slider(
+            modifier = Modifier.fillMaxWidth(),
             value = local,
             onValueChange = { local = it },
             onValueChangeFinished = { onChange(local) },
