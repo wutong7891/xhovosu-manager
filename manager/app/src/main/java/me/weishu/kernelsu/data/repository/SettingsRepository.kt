@@ -32,6 +32,12 @@ interface SettingsRepository {
     var useSoftReboot: Boolean
     /** 整体背景图的 content:// URI，空串表示不设置。 */
     var nightBackgroundUri: String
+    /** 背景图/视频强度，0..1 */
+    var backgroundIntensity: Float
+    /** 界面容器不透明度，0..1，越低背景越透 */
+    var uiOpacity: Float
+    /** 雪花下落速度倍率，0.2..3 */
+    var snowSpeed: Float
     val intentToken: String
 
     suspend fun getSuCompatStatus(): String
