@@ -50,11 +50,13 @@ class MainPagerState(
                 if (animatePageChanges) {
                     // 用一条偏慢的缓动曲线，让页面像慢慢流出来一样滑过去，
                     // 而不是弹簧那种「弹一下」的观感
+                    // 720ms 太慢，切页时几乎看不到位移过程。
+                    // 压到 420ms 并让曲线前段猛、尾部收，滑动痕迹更清楚。
                     pagerState.animateScrollToPage(
                         targetIndex,
                         animationSpec = tween(
-                            durationMillis = 720,
-                            easing = CubicBezierEasing(0.16f, 0.84f, 0.24f, 1f),
+                            durationMillis = 420,
+                            easing = CubicBezierEasing(0.22f, 0.92f, 0.16f, 1f),
                         ),
                     )
                 } else {
