@@ -190,7 +190,9 @@ fun SettingPagerMaterial(
                             supportingContent = {
                                 Text(
                                     if (hasBackground) {
-                                        stringResource(id = R.string.settings_background_set)
+                                        android.net.Uri.decode(uiState.nightBackgroundUri)
+                                            .substringAfterLast('/')
+                                            .ifBlank { stringResource(id = R.string.settings_background_set) }
                                     } else {
                                         stringResource(id = R.string.settings_background_summary)
                                     }
