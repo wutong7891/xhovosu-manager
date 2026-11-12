@@ -260,7 +260,9 @@ fun ModulePagerMiuix(
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
 
     Scaffold(
-        topBar = {
+
+
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,        topBar = {
             BlurredBar(backdrop) {
                 searchStatus.TopAppBarAnim(backgroundColor = barColor) {
                     TopAppBar(
