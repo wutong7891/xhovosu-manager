@@ -65,6 +65,9 @@ data class SettingsUiState(
 
     // 背景图
     val nightBackgroundUri: String = "",
+    val backgroundIntensity: Float = 0.50f,
+    val uiOpacity: Float = 0.84f,
+    val snowSpeed: Float = 1.0f,
 )
 
 @Immutable
@@ -91,4 +94,7 @@ data class SettingsScreenActions(
     val onOpenAbout: () -> Unit,
     val onPickBackground: () -> Unit,
     val onClearBackground: () -> Unit,
+    val onSetBackgroundIntensity: (Float) -> Unit,
+    val onSetUiOpacity: (Float) -> Unit,
+    val onSetSnowSpeed: (Float) -> Unit,
 )
