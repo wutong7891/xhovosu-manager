@@ -143,7 +143,7 @@ fun SettingPagerMiuix(
                         modifier = Modifier
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         SwitchPreference(
                             title = stringResource(id = R.string.settings_check_update),
@@ -165,7 +165,7 @@ fun SettingPagerMiuix(
                             modifier = Modifier
                                 .padding(top = 12.dp)
                                 .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                             val stealthTitle = stringResource(id = R.string.customize_title)
                             ArrowPreference(
@@ -206,7 +206,7 @@ fun SettingPagerMiuix(
                         modifier = Modifier
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         OverlayDropdownPreference(
                             title = stringResource(id = R.string.settings_ui_mode),
@@ -257,7 +257,7 @@ fun SettingPagerMiuix(
                         modifier = Modifier
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         val backgroundTitle = stringResource(id = R.string.settings_background)
                         val hasBackground = uiState.nightBackgroundUri.isNotBlank()
@@ -432,7 +432,7 @@ fun SettingPagerMiuix(
                             modifier = Modifier
                                 .padding(top = 12.dp)
                                 .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                             val profileTemplate = stringResource(id = R.string.settings_profile_template)
                             ArrowPreference(
@@ -456,7 +456,7 @@ fun SettingPagerMiuix(
                             modifier = Modifier
                                 .padding(top = 12.dp)
                                 .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                             // 前台监听功能暂时下线
                             val watcherTitle = stringResource(id = R.string.foreground_watcher_title)
@@ -481,7 +481,7 @@ fun SettingPagerMiuix(
                             modifier = Modifier
                                 .padding(top = 12.dp)
                                 .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                             val suCompatModeItems = listOf(
                                 stringResource(id = R.string.settings_mode_enable_by_default),
@@ -642,7 +642,7 @@ fun SettingPagerMiuix(
                             modifier = Modifier
                                 .padding(top = 12.dp)
                                 .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                             SwitchPreference(
                                 title = stringResource(id = R.string.settings_umount_modules_default),
@@ -696,7 +696,7 @@ fun SettingPagerMiuix(
                             modifier = Modifier
                                 .padding(top = 12.dp)
                                 .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                             val uninstall = stringResource(id = R.string.settings_uninstall)
                             ArrowPreference(
@@ -723,7 +723,7 @@ fun SettingPagerMiuix(
                         modifier = Modifier
                             .padding(vertical = 12.dp)
                             .fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         ArrowPreference(
                             title = stringResource(id = R.string.send_log),
