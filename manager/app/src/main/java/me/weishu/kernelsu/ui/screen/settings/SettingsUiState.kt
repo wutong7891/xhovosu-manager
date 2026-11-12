@@ -61,7 +61,10 @@ data class SettingsUiState(
     val autoJailbreak: Boolean = false,
 
     // Soft Reboot
-    val useSoftReboot: Boolean = false
+    val useSoftReboot: Boolean = false,
+
+    // 背景图
+    val nightBackgroundUri: String = "",
 )
 
 @Immutable
@@ -86,4 +89,6 @@ data class SettingsScreenActions(
     val onSetAutoJailbreak: (Boolean) -> Unit,
     val onSetUseSoftReboot: (Boolean) -> Unit,
     val onOpenAbout: () -> Unit,
+    val onPickBackground: () -> Unit,
+    val onClearBackground: () -> Unit,
 )
