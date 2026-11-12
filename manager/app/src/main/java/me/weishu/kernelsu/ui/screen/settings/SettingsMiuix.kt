@@ -223,7 +223,10 @@ fun SettingPagerMiuix(
                         ArrowPreference(
                             title = backgroundTitle,
                             summary = if (hasBackground) {
-                                stringResource(id = R.string.settings_background_set)
+                                // 显示选中的文件名，一眼能看出到底选没选上
+                                android.net.Uri.decode(uiState.nightBackgroundUri)
+                                    .substringAfterLast('/')
+                                    .ifBlank { stringResource(id = R.string.settings_background_set) }
                             } else {
                                 stringResource(id = R.string.settings_background_summary)
                             },
