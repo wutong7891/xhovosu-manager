@@ -27,7 +27,17 @@ import androidx.compose.material.icons.rounded.DisplaySettings
 import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LayersClear
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.rounded.HideImage
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import top.yukonga.miuix.kmp.basic.Slider
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.RestartAlt
@@ -68,6 +78,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.basic.Text
 
 private const val SHOW_FOREGROUND_WATCHER = false
 
@@ -239,6 +251,31 @@ fun SettingPagerMiuix(
                                 )
                             },
                             onClick = actions.onPickBackground
+                        )
+                        // 三个可调项：背景强度、界面不透明度、雪花速度
+                        SliderRow(
+                            title = stringResource(id = R.string.settings_bg_intensity),
+                            summary = stringResource(id = R.string.settings_bg_intensity_summary),
+                            value = uiState.backgroundIntensity,
+                            range = 0f..1f,
+                            format = { "${(it * 100).toInt()}%" },
+                            onChange = actions.onSetBackgroundIntensity,
+                        )
+                        SliderRow(
+                            title = stringResource(id = R.string.settings_ui_opacity),
+                            summary = stringResource(id = R.string.settings_ui_opacity_summary),
+                            value = uiState.uiOpacity,
+                            range = 0.05f..1f,
+                            format = { "${(it * 100).toInt()}%" },
+                            onChange = actions.onSetUiOpacity,
+                        )
+                        SliderRow(
+                            title = stringResource(id = R.string.settings_snow_speed),
+                            summary = stringResource(id = R.string.settings_snow_speed_summary),
+                            value = uiState.snowSpeed,
+                            range = 0.2f..3f,
+                            format = { String.format("%.1fx", it) },
+                            onChange = actions.onSetSnowSpeed,
                         )
                         if (hasBackground) {
                             ArrowPreference(
@@ -583,5 +620,39 @@ fun SettingPagerMiuix(
                 }
             }
         }
+    }
+}
+
+/** 一行标题 + 当前值 + 可左右拖动的滑块，值变化结束才写回配置。 */
+@Composable
+private fun SliderRow(
+    title: String,
+    summary: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    format: (Float) -> String,
+    onChange: (Float) -> Unit,
+) {
+    var local by remember(value) { mutableFloatStateOf(value) }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(text = title, fontSize = 14.sp)
+            Text(text = format(local), fontSize = 13.sp, color = colorScheme.primary)
+        }
+        Text(
+            text = summary,
+            fontSize = 11.sp,
+            color = colorScheme.onSurfaceVariantSummary,
+            modifier = Modifier.padding(top = 1.dp, bottom = 4.dp),
+        )
+        Slider(
+            value = local,
+            onValueChange = { local = it },
+            onValueChangeFinished = { onChange(local) },
+            valueRange = range,
+        )
     }
 }
