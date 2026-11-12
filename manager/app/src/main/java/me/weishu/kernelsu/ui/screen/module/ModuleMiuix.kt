@@ -790,7 +790,7 @@ fun ModuleItem(
         onClick = if (hasDescription) {
             { expanded = !expanded }
         } else null,
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
