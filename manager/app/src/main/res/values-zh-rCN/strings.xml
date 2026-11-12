@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">主页</string>
-    <string name="home_not_installed">未安装</string>
+    <string name="home_not_installed">防查模式未激活</string>
     <string name="home_click_to_install">点击安装</string>
-    <string name="home_working">工作中</string>
+    <string name="home_working">防查模式已激活</string>
     <string name="home_working_version">版本：%s</string>
     <string name="home_lkm_update_available">内嵌 LKM 有可用更新，点击更新</string>
     <string name="home_lkm_custom">自定义</string>
@@ -221,6 +221,11 @@
     <string name="module_undo_uninstall_success">成功撤销卸载 %s</string>
     <string name="module_undo_uninstall_failed">撤销卸载 %s 失败</string>
     <string name="group_contains_apps">包含 %d 个应用</string>
+    <string name="settings_background">自定义背景</string>
+    <string name="settings_background_summary">选一张图片作为整个应用的背景</string>
+    <string name="settings_background_none">未设置</string>
+    <string name="settings_background_set">已设置背景</string>
+    <string name="settings_background_clear">清除背景</string>
     <string name="settings_theme">主题设置</string>
     <string name="settings_theme_summary">自定义更多主题选项</string>
     <string name="settings_theme_mode_system">跟随系统</string>
