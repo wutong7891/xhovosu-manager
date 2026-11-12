@@ -37,6 +37,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.LocalMainPagerState
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
