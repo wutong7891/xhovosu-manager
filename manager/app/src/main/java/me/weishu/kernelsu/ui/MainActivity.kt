@@ -69,6 +69,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.ui.component.SnowfallOverlay
 import me.weishu.kernelsu.ui.component.bottombar.BottomBar
 import me.weishu.kernelsu.ui.component.bottombar.MainPagerState
 import me.weishu.kernelsu.ui.component.bottombar.NavigationBadgeState
@@ -348,6 +349,8 @@ private fun NightBackground(uriText: String, content: @Composable () -> Unit) {
                 alpha = 0.42f,
             )
         }
+        // 氛围雪花：压在最底层内容之上，不接手势
+        SnowfallOverlay(Modifier.fillMaxSize())
         content()
     }
 }
