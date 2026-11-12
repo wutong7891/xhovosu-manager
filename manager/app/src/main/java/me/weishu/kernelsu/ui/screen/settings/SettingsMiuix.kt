@@ -27,6 +27,8 @@ import androidx.compose.material.icons.rounded.DisplaySettings
 import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LayersClear
+import androidx.compose.material.icons.rounded.HideImage
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Security
@@ -208,6 +210,47 @@ fun SettingPagerMiuix(
                             },
                             onClick = actions.onOpenTheme
                         )
+                    }
+
+                    // 自定义背景图：选一张图铺在整个应用后面，配合雪花做氛围
+                    Card(
+                        modifier = Modifier
+                            .padding(top = 12.dp)
+                            .fillMaxWidth(),
+                    ) {
+                        val backgroundTitle = stringResource(id = R.string.settings_background)
+                        val hasBackground = uiState.nightBackgroundUri.isNotBlank()
+                        ArrowPreference(
+                            title = backgroundTitle,
+                            summary = if (hasBackground) {
+                                stringResource(id = R.string.settings_background_set)
+                            } else {
+                                stringResource(id = R.string.settings_background_summary)
+                            },
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.Image,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = backgroundTitle,
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            onClick = actions.onPickBackground
+                        )
+                        if (hasBackground) {
+                            ArrowPreference(
+                                title = stringResource(id = R.string.settings_background_clear),
+                                startAction = {
+                                    Icon(
+                                        Icons.Rounded.HideImage,
+                                        modifier = Modifier.padding(end = 6.dp),
+                                        contentDescription = null,
+                                        tint = colorScheme.onBackground
+                                    )
+                                },
+                                onClick = actions.onClearBackground
+                            )
+                        }
                     }
 
                     KsuIsValid {
