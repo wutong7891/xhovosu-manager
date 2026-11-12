@@ -273,10 +273,11 @@ private fun StatusCard(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.defaultColors(
+                            // 半透明，让背景图层透出来，同时保住文字可读性
                             color = when {
-                                isDynamicColor -> colorScheme.secondaryContainer
-                                isInDarkTheme() -> Color(0xFF1A3825)
-                                else -> Color(0xFFDFFAE4)
+                                isDynamicColor -> colorScheme.secondaryContainer.copy(alpha = 0.55f)
+                                isInDarkTheme() -> Color(0xFF1A3825).copy(alpha = 0.55f)
+                                else -> Color(0xFFDFFAE4).copy(alpha = 0.55f)
                             }
                         ),
                         onClick = {
@@ -441,7 +442,10 @@ private fun SupportLinks(
 ) {
     val learnMoreUrl = stringResource(R.string.home_learn_kernelsu_url)
 
-    Card(modifier = modifier) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.55f)),
+    ) {
         ArrowPreference(
             title = stringResource(R.string.home_support_title),
             summary = stringResource(R.string.home_support_content),
@@ -532,7 +536,10 @@ private fun InfoCard(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.55f)),
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoText(
                     icon = Icons.Filled.Tag,
@@ -557,7 +564,10 @@ private fun InfoCard(
                 )
             }
         }
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.55f)),
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoText(
                     icon = Icons.Filled.Security,
