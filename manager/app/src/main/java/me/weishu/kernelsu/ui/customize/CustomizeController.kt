@@ -205,6 +205,8 @@ object CustomizeController {
             append("su -c 'pkill -f xhovo/watch.sh' 2>/dev/null; ")
             append("rm -f ").append(q(CONF_PATH)).append(" 2>/dev/null; ")
             append("rm -f ").append(q("$WORK_DIR/.ksu_install")).append(" 2>/dev/null; ")
+            // 关掉隐形开关时把手动模式一起清掉，否则下次开启会被旧标记挡住
+            append("rm -f ").append(q("$WORK_DIR/.manual_mode")).append(" 2>/dev/null; ")
             append("echo STOPPED")
         }
         exec(command)
