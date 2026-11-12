@@ -67,7 +67,9 @@ fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.55f),
+            color = MaterialTheme.colorScheme.surfaceContainer.copy(
+                alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current
+            ),
             tonalElevation = 0.dp,
             shadowElevation = 14.dp,
         ) {
