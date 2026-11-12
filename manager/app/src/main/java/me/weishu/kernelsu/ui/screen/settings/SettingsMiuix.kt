@@ -83,6 +83,11 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.Text
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 
 private const val SHOW_FOREGROUND_WATCHER = false
 
@@ -286,10 +291,23 @@ fun SettingPagerMiuix(
                                 )
                             },
                             endActions = {
-                                Text(
-                                    text = "${(bgIntensityState * 100).toInt()}%",
-                                    color = colorScheme.onSurfaceVariantActions,
-                                )
+                                // 横向拖动在部分 ROM 上收不到手势，两端配步进按钮兜底
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    StepperButton("－") {
+                                        val v = (bgIntensityState - 0.05f).coerceIn(0f, 1f)
+                                        bgIntensityState = v
+                                        actions.onSetBackgroundIntensity(v)
+                                    }
+                                    Text(
+                                        text = "${(bgIntensityState * 100).toInt()}%",
+                                        color = colorScheme.onSurfaceVariantActions,
+                                    )
+                                    StepperButton("＋") {
+                                        val v = (bgIntensityState + 0.05f).coerceIn(0f, 1f)
+                                        bgIntensityState = v
+                                        actions.onSetBackgroundIntensity(v)
+                                    }
+                                }
                             },
                             onClick = { showBgIntensity.value = !showBgIntensity.value },
                             holdDownState = showBgIntensity.value,
@@ -316,10 +334,22 @@ fun SettingPagerMiuix(
                                 )
                             },
                             endActions = {
-                                Text(
-                                    text = "${(uiOpacityState * 100).toInt()}%",
-                                    color = colorScheme.onSurfaceVariantActions,
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    StepperButton("－") {
+                                        val v = (uiOpacityState - 0.05f).coerceIn(0.05f, 1f)
+                                        uiOpacityState = v
+                                        actions.onSetUiOpacity(v)
+                                    }
+                                    Text(
+                                        text = "${(uiOpacityState * 100).toInt()}%",
+                                        color = colorScheme.onSurfaceVariantActions,
+                                    )
+                                    StepperButton("＋") {
+                                        val v = (uiOpacityState + 0.05f).coerceIn(0.05f, 1f)
+                                        uiOpacityState = v
+                                        actions.onSetUiOpacity(v)
+                                    }
+                                }
                             },
                             onClick = { showUiOpacity.value = !showUiOpacity.value },
                             holdDownState = showUiOpacity.value,
@@ -346,10 +376,22 @@ fun SettingPagerMiuix(
                                 )
                             },
                             endActions = {
-                                Text(
-                                    text = String.format("%.1fx", snowSpeedState),
-                                    color = colorScheme.onSurfaceVariantActions,
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    StepperButton("－") {
+                                        val v = (snowSpeedState - 0.1f).coerceIn(0.2f, 3f)
+                                        snowSpeedState = v
+                                        actions.onSetSnowSpeed(v)
+                                    }
+                                    Text(
+                                        text = String.format("%.1fx", snowSpeedState),
+                                        color = colorScheme.onSurfaceVariantActions,
+                                    )
+                                    StepperButton("＋") {
+                                        val v = (snowSpeedState + 0.1f).coerceIn(0.2f, 3f)
+                                        snowSpeedState = v
+                                        actions.onSetSnowSpeed(v)
+                                    }
+                                }
                             },
                             onClick = { showSnowSpeed.value = !showSnowSpeed.value },
                             holdDownState = showSnowSpeed.value,
@@ -707,5 +749,19 @@ fun SettingPagerMiuix(
                 }
             }
         }
+    }
+}
+
+/** 加减步进按钮。滑动手势在部分 ROM 上传不到滑块，用它兜底。 */
+@Composable
+private fun StepperButton(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text = label, fontSize = 18.sp, color = colorScheme.primary)
     }
 }
