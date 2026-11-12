@@ -1,6 +1,6 @@
 package me.weishu.kernelsu.ui.screen.settings
 
-import android.content.Intent
+import java.io.File
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -33,18 +33,23 @@ fun SettingPager(
     val initialResumeHandled = rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
 
-    // 选图后要把读取权限持久化，否则重启应用就再也读不到这张图
+    // 选完立刻把图拷进应用私有目录。
+    // 直接用 content:// 的话，一旦授权丢失或系统回收，
+    // 下次启动就读不出来，界面上等于「背景图没了」。
     val backgroundPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            runCatching {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                )
+            val saved = runCatching {
+                val target = File(context.filesDir, "xh_background.img")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    target.outputStream().use { output -> input.copyTo(output) }
+                }
+                target.absolutePath
+            }.getOrNull()
+            if (saved != null) {
+                viewModel.setNightBackground(saved)
             }
-            viewModel.setNightBackground(uri.toString())
         }
     }
 
