@@ -221,6 +221,12 @@
     <string name="module_undo_uninstall_success">成功撤销卸载 %s</string>
     <string name="module_undo_uninstall_failed">撤销卸载 %s 失败</string>
     <string name="group_contains_apps">包含 %d 个应用</string>
+    <string name="settings_bg_intensity">背景强度</string>
+    <string name="settings_bg_intensity_summary">控制背景图或视频的浓淡</string>
+    <string name="settings_ui_opacity">界面不透明度</string>
+    <string name="settings_ui_opacity_summary">越低界面越透，背景越明显</string>
+    <string name="settings_snow_speed">雪花速度</string>
+    <string name="settings_snow_speed_summary">雪花下落快慢</string>
     <string name="settings_background">自定义背景</string>
     <string name="settings_background_summary">选一张图片作为整个应用的背景</string>
     <string name="settings_background_none">未设置</string>
