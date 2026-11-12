@@ -104,7 +104,9 @@ fun SettingPagerMiuix(
     val context = LocalContext.current
 
     Scaffold(
-        topBar = {
+
+
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,        topBar = {
             BlurredBar(backdrop) {
                 TopAppBar(
                     color = barColor,
