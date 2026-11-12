@@ -142,7 +142,7 @@ fun SettingPagerMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),,
+                            .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                         SwitchPreference(
@@ -164,7 +164,7 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),,
+                                .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                             val stealthTitle = stringResource(id = R.string.customize_title)
@@ -205,7 +205,7 @@ fun SettingPagerMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),,
+                            .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                         OverlayDropdownPreference(
@@ -256,7 +256,7 @@ fun SettingPagerMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),,
+                            .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                         val backgroundTitle = stringResource(id = R.string.settings_background)
@@ -431,7 +431,7 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),,
+                                .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                             val profileTemplate = stringResource(id = R.string.settings_profile_template)
@@ -455,7 +455,7 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),,
+                                .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                             // 前台监听功能暂时下线
@@ -480,7 +480,7 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),,
+                                .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                             val suCompatModeItems = listOf(
@@ -641,7 +641,7 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),,
+                                .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                             SwitchPreference(
@@ -695,7 +695,7 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),,
+                                .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                             val uninstall = stringResource(id = R.string.settings_uninstall)
@@ -722,7 +722,7 @@ fun SettingPagerMiuix(
                     Card(
                         modifier = Modifier
                             .padding(vertical = 12.dp)
-                            .fillMaxWidth(),,
+                            .fillMaxWidth(),
             colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
         ) {
                         ArrowPreference(
