@@ -261,8 +261,8 @@ fun ModulePagerMiuix(
 
     Scaffold(
 
-
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,        topBar = {
+        containerColor = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.surface.copy(alpha = 0.72f),
+        topBar = {
             BlurredBar(backdrop) {
                 searchStatus.TopAppBarAnim(backgroundColor = barColor) {
                     TopAppBar(
