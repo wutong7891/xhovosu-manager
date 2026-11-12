@@ -354,10 +354,15 @@ private fun NightBackground(
     val bitmap by produceState<android.graphics.Bitmap?>(null, uriText) {
         value = withContext(Dispatchers.IO) {
             runCatching {
-                if (uriText.isBlank()) {
-                    null
-                } else {
-                    context.contentResolver.openInputStream(Uri.parse(uriText))
+                when {
+                    uriText.isBlank() -> null
+                    // 私有目录里的文件
+                    !uriText.contains("://") -> java.io.File(uriText)
+                        .takeIf { it.isFile }
+                        ?.inputStream()
+                        ?.use(BitmapFactory::decodeStream)
+                    // 兼容旧的 content:// 记录
+                    else -> context.contentResolver.openInputStream(Uri.parse(uriText))
                         ?.use(BitmapFactory::decodeStream)
                 }
             }.getOrNull()
