@@ -170,11 +170,11 @@ class SettingsRepositoryImpl : SettingsRepository {
         set(value) = prefs.edit { putString("night_background_uri", value) }
 
     override var backgroundIntensity: Float
-        get() = prefs.getFloat("background_intensity", 0.88f)
+        get() = prefs.getFloat("background_intensity", 1.0f)
         set(value) = prefs.edit { putFloat("background_intensity", value) }
 
     override var uiOpacity: Float
-        get() = prefs.getFloat("ui_opacity", 0.22f)
+        get() = prefs.getFloat("ui_opacity", 0.05f)
         set(value) = prefs.edit { putFloat("ui_opacity", value) }
 
     override var snowSpeed: Float
