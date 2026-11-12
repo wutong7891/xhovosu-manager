@@ -30,6 +30,8 @@ interface SettingsRepository {
     var suLogFilters: Set<String>?
     var autoJailbreak: Boolean
     var useSoftReboot: Boolean
+    /** 整体背景图的 content:// URI，空串表示不设置。 */
+    var nightBackgroundUri: String
     val intentToken: String
 
     suspend fun getSuCompatStatus(): String
