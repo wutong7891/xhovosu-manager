@@ -17,7 +17,7 @@ data class MainActivityUiState(
     val moduleDescriptionMaxLines: Int = 4,
     val backgroundUri: String = "",
     val backgroundIntensity: Float = 0.50f,
-    val uiOpacity: Float = 0.84f,
+    val uiOpacity: Float = 0.22f,
     val snowSpeed: Float = 1.0f,
     val uiMode: UiMode,
 )
