@@ -169,6 +169,18 @@ class SettingsRepositoryImpl : SettingsRepository {
         get() = prefs.getString("night_background_uri", "").orEmpty()
         set(value) = prefs.edit { putString("night_background_uri", value) }
 
+    override var backgroundIntensity: Float
+        get() = prefs.getFloat("background_intensity", 0.50f)
+        set(value) = prefs.edit { putFloat("background_intensity", value) }
+
+    override var uiOpacity: Float
+        get() = prefs.getFloat("ui_opacity", 0.84f)
+        set(value) = prefs.edit { putFloat("ui_opacity", value) }
+
+    override var snowSpeed: Float
+        get() = prefs.getFloat("snow_speed", 1.0f)
+        set(value) = prefs.edit { putFloat("snow_speed", value) }
+
     override var useSoftReboot: Boolean
         get() = prefs.getBoolean(KEY_USE_SOFT_REBOOT, false)
         set(value) = prefs.edit { putBoolean(KEY_USE_SOFT_REBOOT, value) }
