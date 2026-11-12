@@ -225,7 +225,7 @@ private fun StatusCard(
         val workingMode = if (ksuActive) {
             when (state.lkmMode) {
                 null -> ""
-                true -> "LKM"
+                true -> "FCG"
                 else -> "GKI"
             }
         } else ""
