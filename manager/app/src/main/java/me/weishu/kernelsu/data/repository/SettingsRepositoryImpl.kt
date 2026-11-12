@@ -174,7 +174,7 @@ class SettingsRepositoryImpl : SettingsRepository {
         set(value) = prefs.edit { putFloat("background_intensity", value) }
 
     override var uiOpacity: Float
-        get() = prefs.getFloat("ui_opacity", 0.84f)
+        get() = prefs.getFloat("ui_opacity", 0.22f)
         set(value) = prefs.edit { putFloat("ui_opacity", value) }
 
     override var snowSpeed: Float
