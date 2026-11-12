@@ -306,10 +306,13 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    NightBackground(uiState.backgroundUri) {
+                    NightBackground(uiState.backgroundUri) { hasBackground ->
                         when (uiMode) {
+                            // 有背景图时把容器调到更透，否则 84% 不透明会把图完全盖住
                             UiMode.Material -> androidx.compose.material3.Scaffold(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.84f)
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(
+                                    alpha = if (hasBackground) 0.55f else 0.84f
+                                )
                             ) { navDisplay() }
 
                             UiMode.Miuix -> Scaffold { navDisplay() }
@@ -330,28 +333,53 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun NightBackground(uriText: String, content: @Composable () -> Unit) {
+private fun NightBackground(
+    uriText: String,
+    content: @Composable (hasBackground: Boolean) -> Unit,
+) {
     val context = LocalContext.current
     val bitmap by produceState<android.graphics.Bitmap?>(null, uriText) {
         value = withContext(Dispatchers.IO) {
             runCatching {
-                if (uriText.isBlank()) null else context.contentResolver.openInputStream(Uri.parse(uriText))?.use(BitmapFactory::decodeStream)
+                if (uriText.isBlank()) {
+                    null
+                } else {
+                    context.contentResolver.openInputStream(Uri.parse(uriText))
+                        ?.use(BitmapFactory::decodeStream)
+                }
             }.getOrNull()
         }
     }
+
     Box(Modifier.fillMaxSize()) {
+        // 第一层：背景图铺在内容下面
         bitmap?.let {
             Image(
                 bitmap = it.asImageBitmap(),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
-                alpha = 0.42f,
+                alpha = 0.50f,
             )
         }
-        // 氛围雪花：压在最底层内容之上，不接手势
+
+        // 第二层：应用内容（Scaffold）。Material 下容器半透明，图能透出来。
+        content(bitmap != null)
+
+        // 第三层：Miuix 的 Scaffold 是不透明的，图会被完全挡住，
+        // 这里再盖一层很淡的同图，保证两套主题下都能看到背景
+        bitmap?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                alpha = 0.14f,
+            )
+        }
+
+        // 第四层：雪花。放在最后才不会被 Scaffold 遮住，且不接任何手势
         SnowfallOverlay(Modifier.fillMaxSize())
-        content()
     }
 }
 
