@@ -23,7 +23,16 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.filled.HideImage
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LayersClear
@@ -222,6 +231,32 @@ fun SettingPagerMaterial(
                     }
                 }
             )
+
+                    // 三个可调项
+                    SliderPreference(
+                        title = stringResource(id = R.string.settings_bg_intensity),
+                        summary = stringResource(id = R.string.settings_bg_intensity_summary),
+                        value = uiState.backgroundIntensity,
+                        range = 0f..1f,
+                        format = { "${(it * 100).toInt()}%" },
+                        onChange = actions.onSetBackgroundIntensity,
+                    )
+                    SliderPreference(
+                        title = stringResource(id = R.string.settings_ui_opacity),
+                        summary = stringResource(id = R.string.settings_ui_opacity_summary),
+                        value = uiState.uiOpacity,
+                        range = 0.05f..1f,
+                        format = { "${(it * 100).toInt()}%" },
+                        onChange = actions.onSetUiOpacity,
+                    )
+                    SliderPreference(
+                        title = stringResource(id = R.string.settings_snow_speed),
+                        summary = stringResource(id = R.string.settings_snow_speed_summary),
+                        value = uiState.snowSpeed,
+                        range = 0.2f..3f,
+                        format = { String.format("%.1fx", it) },
+                        onChange = actions.onSetSnowSpeed,
+                    )
 
             val profileTemplate = stringResource(id = R.string.settings_profile_template)
             KsuIsValid {
@@ -486,4 +521,41 @@ private fun TopBar(
         windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
         scrollBehavior = scrollBehavior
     )
+}
+
+/** material3 版滑块，和 miuix 的 SliderRow 行为一致。 */
+@Composable
+private fun SliderPreference(
+    title: String,
+    summary: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    format: (Float) -> String,
+    onChange: (Float) -> Unit,
+) {
+    var local by remember(value) { mutableFloatStateOf(value) }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = format(local),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Text(
+            text = summary,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 1.dp, bottom = 4.dp),
+        )
+        Slider(
+            value = local,
+            onValueChange = { local = it },
+            onValueChangeFinished = { onChange(local) },
+            valueRange = range,
+        )
+    }
 }
