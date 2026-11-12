@@ -17,6 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Article
 import androidx.compose.material.icons.automirrored.rounded.Rule
+import androidx.compose.material.icons.rounded.Opacity
+import androidx.compose.material.icons.rounded.Brightness6
+import androidx.compose.material.icons.rounded.AcUnit
 import androidx.compose.material.icons.rounded.Adb
 import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.BugReport
@@ -105,8 +108,8 @@ fun SettingPagerMiuix(
 
     Scaffold(
 
-
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,        topBar = {
+        containerColor = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.surface.copy(alpha = 0.72f),
+        topBar = {
             BlurredBar(backdrop) {
                 TopAppBar(
                     color = barColor,
@@ -227,6 +230,9 @@ fun SettingPagerMiuix(
                     }
 
                     // 自定义背景图：选一张图铺在整个应用后面，配合雪花做氛围
+                    val showBgIntensity = remember { mutableStateOf(false) }
+                    val showUiOpacity = remember { mutableStateOf(false) }
+                    val showSnowSpeed = remember { mutableStateOf(false) }
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
@@ -254,30 +260,89 @@ fun SettingPagerMiuix(
                             },
                             onClick = actions.onPickBackground
                         )
-                        // 三个可调项：背景强度、界面不透明度、雪花速度
-                        SliderRow(
+                        // 三个可调项。用 ArrowPreference + bottomAction 挂滑块，
+                        // 和主题页那个缩放滑块是同一种写法——裸 Column 里的 Slider
+                        // 在竖向滚动容器中量不出宽度，手指划不动。
+                        ArrowPreference(
                             title = stringResource(id = R.string.settings_bg_intensity),
                             summary = stringResource(id = R.string.settings_bg_intensity_summary),
-                            value = uiState.backgroundIntensity,
-                            range = 0f..1f,
-                            format = { "${(it * 100).toInt()}%" },
-                            onChange = actions.onSetBackgroundIntensity,
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.Brightness6,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = null,
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            endActions = {
+                                Text(
+                                    text = "${(uiState.backgroundIntensity * 100).toInt()}%",
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = { showBgIntensity.value = !showBgIntensity.value },
+                            holdDownState = showBgIntensity.value,
+                            bottomAction = {
+                                Slider(
+                                    value = uiState.backgroundIntensity,
+                                    onValueChange = actions.onSetBackgroundIntensity,
+                                    valueRange = 0f..1f,
+                                )
+                            },
                         )
-                        SliderRow(
+                        ArrowPreference(
                             title = stringResource(id = R.string.settings_ui_opacity),
                             summary = stringResource(id = R.string.settings_ui_opacity_summary),
-                            value = uiState.uiOpacity,
-                            range = 0.05f..1f,
-                            format = { "${(it * 100).toInt()}%" },
-                            onChange = actions.onSetUiOpacity,
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.Opacity,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = null,
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            endActions = {
+                                Text(
+                                    text = "${(uiState.uiOpacity * 100).toInt()}%",
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = { showUiOpacity.value = !showUiOpacity.value },
+                            holdDownState = showUiOpacity.value,
+                            bottomAction = {
+                                Slider(
+                                    value = uiState.uiOpacity,
+                                    onValueChange = actions.onSetUiOpacity,
+                                    valueRange = 0.05f..1f,
+                                )
+                            },
                         )
-                        SliderRow(
+                        ArrowPreference(
                             title = stringResource(id = R.string.settings_snow_speed),
                             summary = stringResource(id = R.string.settings_snow_speed_summary),
-                            value = uiState.snowSpeed,
-                            range = 0.2f..3f,
-                            format = { String.format("%.1fx", it) },
-                            onChange = actions.onSetSnowSpeed,
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.AcUnit,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = null,
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            endActions = {
+                                Text(
+                                    text = String.format("%.1fx", uiState.snowSpeed),
+                                    color = colorScheme.onSurfaceVariantActions,
+                                )
+                            },
+                            onClick = { showSnowSpeed.value = !showSnowSpeed.value },
+                            holdDownState = showSnowSpeed.value,
+                            bottomAction = {
+                                Slider(
+                                    value = uiState.snowSpeed,
+                                    onValueChange = actions.onSetSnowSpeed,
+                                    valueRange = 0.2f..3f,
+                                )
+                            },
                         )
                         if (hasBackground) {
                             ArrowPreference(
@@ -622,40 +687,5 @@ fun SettingPagerMiuix(
                 }
             }
         }
-    }
-}
-
-/** 一行标题 + 当前值 + 可左右拖动的滑块，值变化结束才写回配置。 */
-@Composable
-private fun SliderRow(
-    title: String,
-    summary: String,
-    value: Float,
-    range: ClosedFloatingPointRange<Float>,
-    format: (Float) -> String,
-    onChange: (Float) -> Unit,
-) {
-    var local by remember(value) { mutableFloatStateOf(value) }
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(text = title, fontSize = 14.sp)
-            Text(text = format(local), fontSize = 13.sp, color = colorScheme.primary)
-        }
-        Text(
-            text = summary,
-            fontSize = 11.sp,
-            color = colorScheme.onSurfaceVariantSummary,
-            modifier = Modifier.padding(top = 1.dp, bottom = 4.dp),
-        )
-        Slider(
-            modifier = Modifier.fillMaxWidth(),
-            value = local,
-            onValueChange = { local = it },
-            onValueChangeFinished = { onChange(local) },
-            valueRange = range,
-        )
     }
 }
