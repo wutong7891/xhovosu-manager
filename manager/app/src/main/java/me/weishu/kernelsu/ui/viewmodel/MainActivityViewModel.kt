@@ -54,6 +54,9 @@ class MainActivityViewModel(
             pagerInterceptionMode = settingRepo.pagerInterceptionMode,
             moduleDescriptionMaxLines = settingRepo.moduleDescriptionMaxLines,
             backgroundUri = prefs.getString("night_background_uri", "").orEmpty(),
+            backgroundIntensity = prefs.getFloat("background_intensity", 0.50f),
+            uiOpacity = prefs.getFloat("ui_opacity", 0.84f),
+            snowSpeed = prefs.getFloat("snow_speed", 1.0f),
             uiMode = UiMode.fromValue(settingRepo.uiMode),
         )
     }
@@ -71,6 +74,9 @@ class MainActivityViewModel(
             "enable_floating_bottom_bar_blur",
             "enable_navigation_badge",
             "night_background_uri",
+            "background_intensity",
+            "ui_opacity",
+            "snow_speed",
             "enable_swipe_dismiss",
             "pager_interception_mode",
             "ui_mode",
