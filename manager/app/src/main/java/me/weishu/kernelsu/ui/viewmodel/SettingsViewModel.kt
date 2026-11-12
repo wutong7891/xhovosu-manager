@@ -90,6 +90,7 @@ class SettingsViewModel(
             val uiMode = repo.uiMode
             val autoJailbreak = repo.autoJailbreak
             val useSoftReboot = repo.useSoftReboot
+            val nightBackgroundUri = repo.nightBackgroundUri
             val isLateLoadMode = Natives.isLateLoadMode
 
             _uiState.update {
@@ -129,10 +130,16 @@ class SettingsViewModel(
                     isLkmMode = isLkmMode,
                     autoJailbreak = autoJailbreak,
                     useSoftReboot = useSoftReboot,
+                    nightBackgroundUri = nightBackgroundUri,
                     isLateLoadMode = isLateLoadMode,
                 )
             }
         }
+    }
+
+    fun setNightBackground(uri: String) {
+        repo.nightBackgroundUri = uri
+        _uiState.update { it.copy(nightBackgroundUri = uri) }
     }
 
     fun setCheckUpdate(enabled: Boolean) {
