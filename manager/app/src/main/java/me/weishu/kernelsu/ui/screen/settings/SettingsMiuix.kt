@@ -88,6 +88,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import top.yukonga.miuix.kmp.basic.CardDefaults
 
 private const val SHOW_FOREGROUND_WATCHER = false
 
@@ -141,8 +142,9 @@ fun SettingPagerMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),
-                    ) {
+                            .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                         SwitchPreference(
                             title = stringResource(id = R.string.settings_check_update),
                             summary = stringResource(id = R.string.settings_check_update_summary),
@@ -162,8 +164,9 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),
-                        ) {
+                                .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                             val stealthTitle = stringResource(id = R.string.customize_title)
                             ArrowPreference(
                                 title = stealthTitle,
@@ -202,8 +205,9 @@ fun SettingPagerMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),
-                    ) {
+                            .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                         OverlayDropdownPreference(
                             title = stringResource(id = R.string.settings_ui_mode),
                             summary = stringResource(id = R.string.settings_ui_mode_summary),
@@ -252,8 +256,9 @@ fun SettingPagerMiuix(
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
-                            .fillMaxWidth(),
-                    ) {
+                            .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                         val backgroundTitle = stringResource(id = R.string.settings_background)
                         val hasBackground = uiState.nightBackgroundUri.isNotBlank()
                         ArrowPreference(
@@ -426,8 +431,9 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),
-                        ) {
+                                .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                             val profileTemplate = stringResource(id = R.string.settings_profile_template)
                             ArrowPreference(
                                 title = profileTemplate,
@@ -449,8 +455,9 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),
-                        ) {
+                                .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                             // 前台监听功能暂时下线
                             val watcherTitle = stringResource(id = R.string.foreground_watcher_title)
                             if (SHOW_FOREGROUND_WATCHER) ArrowPreference(
@@ -473,8 +480,9 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),
-                        ) {
+                                .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                             val suCompatModeItems = listOf(
                                 stringResource(id = R.string.settings_mode_enable_by_default),
                                 stringResource(id = R.string.settings_mode_disable_until_reboot),
@@ -633,8 +641,9 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),
-                        ) {
+                                .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                             SwitchPreference(
                                 title = stringResource(id = R.string.settings_umount_modules_default),
                                 summary = stringResource(id = R.string.settings_umount_modules_default_summary),
@@ -686,8 +695,9 @@ fun SettingPagerMiuix(
                         Card(
                             modifier = Modifier
                                 .padding(top = 12.dp)
-                                .fillMaxWidth(),
-                        ) {
+                                .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                             val uninstall = stringResource(id = R.string.settings_uninstall)
                             ArrowPreference(
                                 title = uninstall,
@@ -712,8 +722,9 @@ fun SettingPagerMiuix(
                     Card(
                         modifier = Modifier
                             .padding(vertical = 12.dp)
-                            .fillMaxWidth(),
-                    ) {
+                            .fillMaxWidth(),,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
                         ArrowPreference(
                             title = stringResource(id = R.string.send_log),
                             startAction = {
