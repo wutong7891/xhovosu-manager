@@ -221,7 +221,12 @@ fun FloatingBottomBar(
     val accentColor = MiuixTheme.colorScheme.primary
     val tabContentColor = MiuixTheme.colorScheme.onSurface
     val surfaceContainer = MiuixTheme.colorScheme.surfaceContainer
-    val containerColor = if (isBlurEnabled) surfaceContainer.copy(0.4f) else surfaceContainer
+    // 不铺实心容器色，跟随界面不透明度，让底栏也透出背景
+    val containerColor = if (isBlurEnabled) {
+        surfaceContainer.copy(0.4f)
+    } else {
+        surfaceContainer.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)
+    }
 
     val tabsBackdrop = rememberLayerBackdrop()
     val density = LocalDensity.current
