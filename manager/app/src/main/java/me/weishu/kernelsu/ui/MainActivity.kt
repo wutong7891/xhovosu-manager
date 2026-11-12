@@ -71,6 +71,7 @@ import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.SnowfallOverlay
+import me.weishu.kernelsu.ui.theme.LocalUiOpacity
 import me.weishu.kernelsu.ui.component.VideoBackground
 import me.weishu.kernelsu.ui.component.bottombar.BottomBar
 import me.weishu.kernelsu.ui.component.bottombar.MainPagerState
@@ -308,6 +309,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    CompositionLocalProvider(
+                        LocalUiOpacity provides uiState.uiOpacity
+                    ) {
                     NightBackground(
                         uriText = uiState.backgroundUri,
                         intensity = uiState.backgroundIntensity,
@@ -328,6 +332,7 @@ class MainActivity : ComponentActivity() {
                                 containerColor = Color.Transparent
                             ) { navDisplay() }
                         }
+                    }
                     }
                     SideEffect { contentReady = true }
                     }
