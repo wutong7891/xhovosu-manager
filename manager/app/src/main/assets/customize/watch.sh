@@ -197,6 +197,8 @@ contact_exists() {
     | grep -Fx "$CONTACT")
 
   [ -n "$found" ] && return 0
+  # 走到这里说明两次查询都没命中，记下 CONTACT 便于排查（不是名字错了就是读取失败）
+  log "contact_exists 失败，CONTACT=[$CONTACT] where_hit_len=${#hit}"
   return 1
 }
 # ---------- 装回面具 ----------
@@ -464,6 +466,8 @@ ksu_cycle() {
   pkg=$(cat "$PKG_FILE" 2>/dev/null)
   [ -z "$pkg" ] && pkg=com.HxovoSU.yydsHx
 
+  tick=0
+
   # 启动校准：只要不在目标应用、也不是面具自己在前台，遗留的先卸掉
   cur=$(cat "$FG_FILE" 2>/dev/null)
   # 前台为空说明刷新线程还没起效，这次不校准，等循环里再判
@@ -479,6 +483,12 @@ ksu_cycle() {
 
     # 隐形模式被关掉就退出这个监控
     [ -f "$CONF" ] || { log "隐形配置已移除，KSU 监控退出"; return 0; }
+
+    # 每 30 轮打一次心跳，出问题时能看出循环是否还活着
+    tick=$((tick + 1))
+    if [ $((tick % 30)) -eq 0 ]; then
+      log "心跳 tick=$tick fg=$(cat "$FG_FILE" 2>/dev/null) pkg=$(pkg_installed && echo 在 || echo 无)"
+    fi
 
     cur=$(cat "$FG_FILE" 2>/dev/null)
 
@@ -612,7 +622,17 @@ watch_manual_install &
 MANUAL_PID=$!
 
 # ---------- 后台 KSU 生命周期监控 ----------
-ksu_cycle &
+# 看护循环：ksu_cycle 内部是 while true，正常不会退出。
+# 但只要它因为任何原因结束（配置被清、su 卡死被 kill、异常），
+# 后面就再也不会装面具，表现就是「只有第一次有效」。
+# 套一层循环保证它一直在。
+(
+  while true; do
+    ksu_cycle
+    log "ksu_cycle 已结束，3 秒后重启"
+    bb sleep 3 2>/dev/null || sleep 3
+  done
+) &
 KSU_PID=$!
 
 # ---------- 每设备一个常驻 getevent ----------
