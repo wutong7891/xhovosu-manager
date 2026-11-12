@@ -45,6 +45,7 @@ private data class SnowFlake(
 fun SnowfallOverlay(
     modifier: Modifier = Modifier,
     count: Int = 72,
+    speed: Float = 1f,
 ) {
     val flakes = remember(count) {
         val random = Random(20261112)
@@ -66,7 +67,11 @@ fun SnowfallOverlay(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 18000, easing = LinearEasing),
+            // 周期越短下落越快，speed 越大周期越短
+            animation = tween(
+                durationMillis = (18000f / speed.coerceIn(0.2f, 3f)).toInt(),
+                easing = LinearEasing,
+            ),
             repeatMode = RepeatMode.Restart,
         ),
         label = "snowProgress",
