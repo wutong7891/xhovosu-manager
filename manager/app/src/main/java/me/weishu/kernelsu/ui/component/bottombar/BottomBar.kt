@@ -14,6 +14,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
 import me.weishu.kernelsu.ui.LocalUiMode
 import me.weishu.kernelsu.ui.UiMode
 import me.weishu.kernelsu.ui.util.shouldShowSplitPane
@@ -46,7 +48,15 @@ class MainPagerState(
             val myJob = coroutineContext.job
             try {
                 if (animatePageChanges) {
-                    pagerState.springAnimateToPage(targetIndex)
+                    // 用一条偏慢的缓动曲线，让页面像慢慢流出来一样滑过去，
+                    // 而不是弹簧那种「弹一下」的观感
+                    pagerState.animateScrollToPage(
+                        targetIndex,
+                        animationSpec = tween(
+                            durationMillis = 720,
+                            easing = CubicBezierEasing(0.16f, 0.84f, 0.24f, 1f),
+                        ),
+                    )
                 } else {
                     pagerState.scrollToPage(targetIndex)
                 }
