@@ -275,9 +275,18 @@ private fun StatusCard(
                         colors = CardDefaults.defaultColors(
                             // 半透明，让背景图层透出来，同时保住文字可读性
                             color = when {
-                                isDynamicColor -> colorScheme.secondaryContainer.copy(alpha = 0.42f)
-                                isInDarkTheme() -> Color(0xFF1A3825).copy(alpha = 0.42f)
-                                else -> Color(0xFFDFFAE4).copy(alpha = 0.42f)
+                                isDynamicColor ->
+                                    colorScheme.secondaryContainer.copy(
+                                        alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current
+                                    )
+                                isInDarkTheme() ->
+                                    Color(0xFF1A3825).copy(
+                                        alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current
+                                    )
+                                else ->
+                                    Color(0xFFDFFAE4).copy(
+                                        alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current
+                                    )
                             }
                         ),
                         onClick = {
@@ -381,7 +390,7 @@ private fun StatusCard(
                         },
                         showIndication = !state.isLateLoadMode,
                         pressFeedbackType = PressFeedbackType.Tilt,
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                         BasicComponent(
                             title = stringResource(R.string.home_not_installed),
@@ -417,7 +426,7 @@ private fun StatusCard(
                     },
                     showIndication = !state.isLateLoadMode,
                     pressFeedbackType = PressFeedbackType.Tilt,
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
                     BasicComponent(
                         title = stringResource(R.string.home_unsupported),
@@ -446,7 +455,7 @@ private fun SupportLinks(
 
     Card(
         modifier = modifier,
-        colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
     ) {
         ArrowPreference(
             title = stringResource(R.string.home_support_title),
@@ -540,7 +549,7 @@ private fun InfoCard(
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoText(
@@ -568,7 +577,7 @@ private fun InfoCard(
         }
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoText(
