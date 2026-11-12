@@ -551,7 +551,8 @@ fun MainScreen(
 
             when (uiMode) {
                 UiMode.Material -> androidx.compose.material3.Scaffold(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    // 透明，让最外层的背景透上来
+                    containerColor = Color.Transparent
                 ) {
                     Row {
                         SideRail(navigationBadge)
@@ -565,7 +566,7 @@ fun MainScreen(
                     }
                 }
 
-                UiMode.Miuix -> Scaffold { _ ->
+                UiMode.Miuix -> Scaffold(containerColor = Color.Transparent) { _ ->
                     Row {
                         SideRail(navigationBadge)
                         Box(
@@ -595,12 +596,15 @@ fun MainScreen(
             when (uiMode) {
                 UiMode.Material -> androidx.compose.material3.Scaffold(
                     bottomBar = bottomBar,
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = Color.Transparent
                 ) { innerPadding ->
                     pagerContent(innerPadding.calculateBottomPadding())
                 }
 
-                UiMode.Miuix -> Scaffold(bottomBar = bottomBar) { innerPadding ->
+                UiMode.Miuix -> Scaffold(
+                    bottomBar = bottomBar,
+                    containerColor = Color.Transparent
+                ) { innerPadding ->
                     pagerContent(innerPadding.calculateBottomPadding())
                 }
             }
