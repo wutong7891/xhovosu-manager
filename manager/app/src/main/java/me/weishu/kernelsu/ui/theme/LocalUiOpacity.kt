@@ -9,4 +9,4 @@ import androidx.compose.runtime.staticCompositionLocalOf
  * 各页面的 Card 从这里读，这样拖动滑块整界面会跟着变透明。
  * 以前是各页面写死固定值，调了等于没调。
  */
-val LocalUiOpacity = staticCompositionLocalOf { 0.22f }
+val LocalUiOpacity = staticCompositionLocalOf { 0.05f }
