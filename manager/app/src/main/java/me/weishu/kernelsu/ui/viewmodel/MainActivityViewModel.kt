@@ -54,7 +54,7 @@ class MainActivityViewModel(
             pagerInterceptionMode = settingRepo.pagerInterceptionMode,
             moduleDescriptionMaxLines = settingRepo.moduleDescriptionMaxLines,
             backgroundUri = prefs.getString("night_background_uri", "").orEmpty(),
-            backgroundIntensity = prefs.getFloat("background_intensity", 0.50f),
+            backgroundIntensity = prefs.getFloat("background_intensity", 0.88f),
             uiOpacity = prefs.getFloat("ui_opacity", 0.22f),
             snowSpeed = prefs.getFloat("snow_speed", 1.0f),
             uiMode = UiMode.fromValue(settingRepo.uiMode),
