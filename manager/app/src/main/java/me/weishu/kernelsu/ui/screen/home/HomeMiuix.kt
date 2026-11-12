@@ -100,7 +100,8 @@ fun HomePagerMiuix(
     val blurActive = backdrop != null
     val barColor = if (blurActive) Color.Transparent else colorScheme.surface
     Scaffold(
-        topBar = {
+
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,        topBar = {
             TopBar(
                 scrollBehavior = scrollBehavior,
                 backdrop = backdrop,
