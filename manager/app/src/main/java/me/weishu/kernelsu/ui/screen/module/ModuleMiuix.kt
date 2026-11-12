@@ -154,6 +154,7 @@ import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.basic.CardDefaults
 
 @SuppressLint("StringFormatInvalid", "LocalContextGetResourceValueCall")
 @Composable
@@ -788,8 +789,9 @@ fun ModuleItem(
         insideMargin = PaddingValues(16.dp),
         onClick = if (hasDescription) {
             { expanded = !expanded }
-        } else null
-    ) {
+        } else null,
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+        ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
