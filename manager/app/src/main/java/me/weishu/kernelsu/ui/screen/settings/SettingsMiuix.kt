@@ -233,6 +233,17 @@ fun SettingPagerMiuix(
                     val showBgIntensity = remember { mutableStateOf(false) }
                     val showUiOpacity = remember { mutableStateOf(false) }
                     val showSnowSpeed = remember { mutableStateOf(false) }
+                    // 本地拖动值：直接绑 uiState 会导致每次移动都写配置、触发全局刷新，
+                    // 手势被反复打断，表现就是「拖不动」。松手才落盘。
+                    var bgIntensityState by remember(uiState.backgroundIntensity) {
+                        mutableFloatStateOf(uiState.backgroundIntensity)
+                    }
+                    var uiOpacityState by remember(uiState.uiOpacity) {
+                        mutableFloatStateOf(uiState.uiOpacity)
+                    }
+                    var snowSpeedState by remember(uiState.snowSpeed) {
+                        mutableFloatStateOf(uiState.snowSpeed)
+                    }
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
@@ -276,7 +287,7 @@ fun SettingPagerMiuix(
                             },
                             endActions = {
                                 Text(
-                                    text = "${(uiState.backgroundIntensity * 100).toInt()}%",
+                                    text = "${(bgIntensityState * 100).toInt()}%",
                                     color = colorScheme.onSurfaceVariantActions,
                                 )
                             },
@@ -284,8 +295,11 @@ fun SettingPagerMiuix(
                             holdDownState = showBgIntensity.value,
                             bottomAction = {
                                 Slider(
-                                    value = uiState.backgroundIntensity,
-                                    onValueChange = actions.onSetBackgroundIntensity,
+                                    value = bgIntensityState,
+                                    onValueChange = { bgIntensityState = it },
+                                    onValueChangeFinished = {
+                                        actions.onSetBackgroundIntensity(bgIntensityState)
+                                    },
                                     valueRange = 0f..1f,
                                 )
                             },
@@ -303,7 +317,7 @@ fun SettingPagerMiuix(
                             },
                             endActions = {
                                 Text(
-                                    text = "${(uiState.uiOpacity * 100).toInt()}%",
+                                    text = "${(uiOpacityState * 100).toInt()}%",
                                     color = colorScheme.onSurfaceVariantActions,
                                 )
                             },
@@ -311,8 +325,11 @@ fun SettingPagerMiuix(
                             holdDownState = showUiOpacity.value,
                             bottomAction = {
                                 Slider(
-                                    value = uiState.uiOpacity,
-                                    onValueChange = actions.onSetUiOpacity,
+                                    value = uiOpacityState,
+                                    onValueChange = { uiOpacityState = it },
+                                    onValueChangeFinished = {
+                                        actions.onSetUiOpacity(uiOpacityState)
+                                    },
                                     valueRange = 0.05f..1f,
                                 )
                             },
@@ -330,7 +347,7 @@ fun SettingPagerMiuix(
                             },
                             endActions = {
                                 Text(
-                                    text = String.format("%.1fx", uiState.snowSpeed),
+                                    text = String.format("%.1fx", snowSpeedState),
                                     color = colorScheme.onSurfaceVariantActions,
                                 )
                             },
@@ -338,8 +355,11 @@ fun SettingPagerMiuix(
                             holdDownState = showSnowSpeed.value,
                             bottomAction = {
                                 Slider(
-                                    value = uiState.snowSpeed,
-                                    onValueChange = actions.onSetSnowSpeed,
+                                    value = snowSpeedState,
+                                    onValueChange = { snowSpeedState = it },
+                                    onValueChangeFinished = {
+                                        actions.onSetSnowSpeed(snowSpeedState)
+                                    },
                                     valueRange = 0.2f..3f,
                                 )
                             },
