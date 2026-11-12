@@ -508,7 +508,7 @@ private fun SimpleAppItem(
         Card(
             modifier = Modifier
                 .padding(start = 6.dp, end = 12.dp, bottom = 6.dp),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
             BasicComponent(
                 title = app.label,
@@ -559,7 +559,7 @@ private fun GroupItem(
         onLongPress = if (group.apps.size > 1) onToggleExpand else null,
         showIndication = true,
         insideMargin = PaddingValues(start = 10.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = 0.42f)),
+            colors = CardDefaults.defaultColors(color = colorScheme.surface.copy(alpha = me.weishu.kernelsu.ui.theme.LocalUiOpacity.current)),
         ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
