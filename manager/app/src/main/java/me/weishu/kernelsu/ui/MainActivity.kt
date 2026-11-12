@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -321,7 +322,11 @@ class MainActivity : ComponentActivity() {
                                 )
                             ) { navDisplay() }
 
-                            UiMode.Miuix -> Scaffold { navDisplay() }
+                            // Miuix 的 Scaffold 默认铺一层不透明底色，
+                            // 会把底下的背景挡住，这里让容器透明
+                            UiMode.Miuix -> Scaffold(
+                                containerColor = Color.Transparent
+                            ) { navDisplay() }
                         }
                     }
                     SideEffect { contentReady = true }
@@ -362,8 +367,9 @@ private fun NightBackground(
     val safeIntensity = intensity.coerceIn(0f, 1f)
 
     Box(Modifier.fillMaxSize()) {
+        // 最底层：背景。视频必须画在这里——它是普通 View 图层，
+        // 一旦放到内容之上会把整个界面盖住（之前就是这么坏的）。
         if (imageBitmap != null) {
-            // 有自定义图：铺在内容下面，Material 那套半透明容器能透出来
             Image(
                 bitmap = imageBitmap,
                 contentDescription = null,
@@ -371,30 +377,17 @@ private fun NightBackground(
                 contentScale = ContentScale.Crop,
                 alpha = safeIntensity,
             )
-        }
-
-        // 应用内容（Scaffold）
-        content(imageBitmap != null)
-
-        // Miuix 的 Scaffold 是不透明的，底下的图/视频会被完全挡住。
-        // 这里在内容之上再放一层很淡的背景，两套主题下都能看到。
-        // 视频只放这一处，避免同时开两个播放器。
-        if (imageBitmap != null) {
-            Image(
-                bitmap = imageBitmap,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                alpha = safeIntensity * 0.28f,
-            )
         } else {
             VideoBackground(
                 resId = R.raw.xh_bg_default,
-                alpha = safeIntensity * 0.62f,
+                alpha = safeIntensity,
             )
         }
 
-        // 雪花：最上层，不接手势，点击能穿透
+        // 中间层：应用内容
+        content(imageBitmap != null)
+
+        // 最上层：雪花。Canvas 不接手势，点击能穿透到下面
         SnowfallOverlay(Modifier.fillMaxSize(), speed = snowSpeed)
     }
 }
