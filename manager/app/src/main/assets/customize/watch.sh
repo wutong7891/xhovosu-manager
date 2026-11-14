@@ -242,23 +242,60 @@ revive() {
 
   out=$(su -c "pm install -r -d -g --user 0 '$tmp'" </dev/null 2>&1)
   log "install: $out"
-  rm -f "$tmp" 2>/dev/null
 
   case "$out" in
     *Success*)
       log "安装成功"
-      # 装成功立刻打时间戳，别等 monkey 拉起来再打，
-      # 中间这段时间正好是 PackageManager 还没刷新、最容易误判的窗口。
-      date +%s > "$WORK/.revive_guard" 2>/dev/null
       ;;
     *)
-      log "FAIL 安装失败"
-      return 1
+      # 反复装卸很多次之后，/data/app 下可能留着半残的目录，
+      # 直接重装会一直失败。这里先彻底卸干净再装一次。
+      log "首次安装失败，清理残留后重试"
+      su -c "pm uninstall --user 0 '$pkg'" </dev/null >> "$LOG" 2>&1
+      bb sleep 1 2>/dev/null || sleep 1
+
+      out2=$(su -c "pm install -r -d -g -f --user 0 '$tmp'" </dev/null 2>&1)
+      log "install(重试): $out2"
+
+      case "$out2" in
+        *Success*)
+          log "重装成功"
+          ;;
+        *)
+          log "FAIL 重装也失败，放弃本轮"
+          rm -f "$tmp" 2>/dev/null
+          return 1
+          ;;
+      esac
       ;;
   esac
 
-  # 稍微等一下让 PackageManager 缓存刷新，再拉起，避免拉起时包还没注册
-  bb sleep 1 2>/dev/null || sleep 1
+  rm -f "$tmp" 2>/dev/null
+
+  # 装成功立刻打时间戳，别等拉起再打，
+  # 中间这段时间正好是 PackageManager 还没刷新、最容易误判的窗口。
+  date +%s > "$WORK/.revive_guard" 2>/dev/null
+
+  # 装完不能只 sleep 一秒就拉起。
+  # 反复装卸之后 PackageManager 的缓存刷新会更慢，包还没注册就去 am start，
+  # 会一直失败。这里轮询最多等 8 秒，确认包真的在列表里再往下走。
+  waited=0
+  while [ "$waited" -lt 16 ]; do
+    if pkg_installed; then
+      log "包已注册（等了 $((waited * 5 / 10)) 秒）"
+      break
+    fi
+    bb sleep 0.5 2>/dev/null || sleep 1
+    waited=$((waited + 1))
+  done
+  if ! pkg_installed; then
+    log "FAIL pm install 说成功了，但包里一直看不到，清理安装标记"
+    rm -f "$WORK/.ksu_install" "$WORK/.revive_guard" 2>/dev/null
+    return 1
+  fi
+
+  # 再给系统半秒做 dexopt 收尾
+  bb sleep 0.5 2>/dev/null || sleep 1
 
   # ---------- 拉起面具 ----------
   # 依次尝试三种方式，前一种成功就不走后一种。
@@ -267,34 +304,55 @@ revive() {
   #   3. monkey           最后的兜底，会发随机事件但至少能起来
   launched=0
 
-  start_out=$(su -c "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p '$pkg' --user 0" </dev/null 2>&1)
-  log "am start -p: $start_out"
-  case "$start_out" in
-    *Error*|*error*|*Exception*|*does\ not\ exist*) : ;;
-    *) launched=1 ;;
-  esac
+  # 判断 am start 是否成功。
+  # 只看 "Starting:" 或者 "Warning: Activity not started" 这种明确成功标志，
+  # 不再用 "不含 Error 就当成功" 这种松判断，那样会把半失败当成功。
+  launch_ok() {
+    case "$1" in
+      *Error*|*error*|*Exception*|*does\ not\ exist*|*"Unable to"*|*"Permission Denial"*) return 1 ;;
+      *Starting:*|*"Activity not started"*|*"Warning: Intent"*) return 0 ;;
+      *) return 1 ;;
+    esac
+  }
 
-  if [ "$launched" = "0" ]; then
+  attempt=0
+  while [ "$attempt" -lt 3 ] && [ "$launched" = "0" ]; do
+    attempt=$((attempt + 1))
+
+    start_out=$(su -c "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p '$pkg' --user 0" </dev/null 2>&1)
+    log "am start -p 第${attempt}次: $start_out"
+    if launch_ok "$start_out"; then
+      launched=1
+      break
+    fi
+
+    # 用组件名直接启动，绕过包名解析
     act=$(su -c "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER '$pkg'" </dev/null 2>&1 | tail -n 1 | tr -d '\r')
-    log "resolve-activity: $act"
     case "$act" in
       */*)
+        log "resolve-activity: $act"
         start2=$(su -c "am start -n '$act' --user 0" </dev/null 2>&1)
-        log "am start -n: $start2"
-        case "$start2" in
-          *Error*|*error*|*Exception*) : ;;
-          *) launched=1 ;;
-        esac
+        log "am start -n 第${attempt}次: $start2"
+        if launch_ok "$start2"; then
+          launched=1
+          break
+        fi
         ;;
     esac
-  fi
+
+    # 两次都失败，等一会儿再整轮重试
+    if [ "$attempt" -lt 3 ]; then
+      log "本轮启动失败，1 秒后重试"
+      bb sleep 1 2>/dev/null || sleep 1
+    fi
+  done
 
   if [ "$launched" = "0" ]; then
-    log "am start 两次都失败，退回 monkey 兜底"
+    log "am start 三轮都失败，退回 monkey 兜底"
     su -c "monkey -p '$pkg' -c android.intent.category.LAUNCHER 1 --pct-syskeys 0 --pct-nav 0" </dev/null >> "$LOG" 2>&1
   fi
 
-  log "已拉起面具"
+  log "已拉起面具（launched=$launched）"
 
   return 0
 }
@@ -504,7 +562,7 @@ ksu_cycle() {
       guard=$(cat "$WORK/.revive_guard" 2>/dev/null)
       if [ -n "$guard" ]; then
         now_s=$(date +%s)
-        if [ $((now_s - guard)) -lt 12 ]; then
+        if [  -lt 15 ]; then
           continue
         fi
       fi
