@@ -121,26 +121,6 @@ object CustomizeController {
 
         val command = buildString {
             append("mkdir -p ").append(q(WORK_DIR)).append(" 2>/dev/null; ")
-
-            // 无条件清掉上一轮留下的所有运行时标记。
-            // 点「保存并隐藏」就是要重新来一遍，不管之前配过没有、
-            // 也不管上一轮是正常结束还是卡住了，这些标记留着都会干扰新配置：
-            //   .revive_guard  会让 revive 以为刚装过，跳过安装
-            //   .ksu_install   会让手动安装检测误判成自己装的
-            //   .press/.presskey  残留的按键时间戳会让手势判定错乱
-            listOf(
-                "$WORK_DIR/.revive_guard",
-                "$WORK_DIR/.ksu_install",
-                "$WORK_DIR/.manual_mode",
-                "$WORK_DIR/.press",
-                "$WORK_DIR/.presskey",
-                "$WORK_DIR/.last_gate",
-                "$WORK_DIR/.rule_input",
-                "$WORK_DIR/.rule_fifo",
-            ).forEach { marker ->
-                append("rm -f ").append(q(marker)).append(" 2>/dev/null; ")
-            }
-
             append("cat > ").append(q(CONF_PATH)).append(" <<'XH_CONF'\n").append(conf).append("XH_CONF\n")
             append("chmod 0644 ").append(q(CONF_PATH)).append(" 2>/dev/null; ")
             append("printf '%s\\n' ").append(q(pkg)).append(" > ").append(q("$WORK_DIR/pkg")).append("; ")
@@ -151,24 +131,13 @@ object CustomizeController {
             append("cp -f \"\$src\" ").append(q(APK_PATH)).append(" && chmod 0644 ").append(q(APK_PATH)).append("; ")
             append("fi; ")
 
-            // 先彻底停掉旧的监听，两个都杀一遍，确保不会出现新旧同时跑
+            // 重启监听以应用新配置
             append("[ -f ").append(q(PID_PATH)).append(" ] && { ")
             append("old=$(cat ").append(q(PID_PATH)).append(" 2>/dev/null); ")
             append("[ -n \"\$old\" ] && kill -9 \"\$old\" 2>/dev/null; rm -f ").append(q(PID_PATH)).append("; }; ")
             append("su -c 'pkill -f xhovo/watch.sh' 2>/dev/null; ")
-            append("su -c 'pkill -f xhovo-watch.sh' 2>/dev/null; ")
-            // 给旧进程一点时间真的退掉，否则新进程可能起在它还没消失时
-            append("sleep 1; ")
-
-            // 启动新监听
             append("su -c 'setsid sh ").append(WATCH_PATH).append(" >/dev/null 2>&1 &' </dev/null; ")
             append("sleep 2; ")
-
-            // 确认真的起来了，最多等 6 秒
-            append("i=0; while [ \"\$i\" -lt 12 ]; do ")
-            append("[ -f ").append(q(PID_PATH)).append(" ] && break; ")
-            append("bb sleep 0.5 2>/dev/null || sleep 1; i=$((i+1)); ")
-            append("done; ")
             append("[ -f ").append(q(PID_PATH)).append(" ] && echo SAVED || echo SAVE_FAILED")
         }
 
@@ -184,8 +153,7 @@ object CustomizeController {
         when {
             !verify.contains("CONFIG_OK") -> "保存失败：配置文件未写入\n$out"
             out.contains("SAVED") -> "配置已保存，监听已重启"
-            target.isBlank() -> "配置已保存。当前没有目标应用，填好目标后监听会自动启动"
-            else -> "配置已保存，但监听没起来。检查一下是否已经授予 root 权限\n$out"
+            else -> "配置已保存（当前没有可监听的目标，监听未启动）"
         }
     }
 
