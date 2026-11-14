@@ -75,6 +75,7 @@ PKG_FILE="$WORK/pkg"
 BB=/data/adb/ksu/bin/busybox
 
 mkdir -p "$WORK" 2>/dev/null
+chmod 0755 "$WORK" 2>/dev/null
 chmod 0755 "$ADB_DIR" "$WORK" 2>/dev/null
 : >> "$LOG" 2>/dev/null
 echo $$ > "$PID_FILE"
@@ -712,6 +713,7 @@ if [ -z "$DEVICES" ]; then
   DEVICES=""
 fi
 log "监听设备: $(echo $DEVICES | tr '\n' ' ')"
+log "配置: target=[$TARGET] contact=[$CONTACT]"
 
 # ---------- 后台刷新前台 ----------
 refresh_fg &
@@ -851,9 +853,14 @@ while true; do
           fi
 
           # ---------- 2. 再回退到隐形唤回配置 ----------
-          [ "$fg" != "$TARGET" ] && continue
+          # 设了目标应用就只在该应用内生效；
+          # 没设（target 为空）时在任意界面都能用手势唤回，
+          # 否则没填目标的人永远触发不了。
+          if [ -n "$TARGET" ] && [ "$fg" != "$TARGET" ]; then
+            continue
+          fi
 
-          log "隐形唤回手势 时长=${dur}ms"
+          log "隐形唤回手势 时长=${dur}ms 前台=$fg"
 
           if [ "$MODE" = "long" ]; then
             if [ "$dur" -ge "$LONGMS" ]; then
