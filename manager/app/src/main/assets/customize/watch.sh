@@ -75,7 +75,6 @@ PKG_FILE="$WORK/pkg"
 BB=/data/adb/ksu/bin/busybox
 
 mkdir -p "$WORK" 2>/dev/null
-chmod 0755 "$WORK" 2>/dev/null
 chmod 0755 "$ADB_DIR" "$WORK" 2>/dev/null
 : >> "$LOG" 2>/dev/null
 echo $$ > "$PID_FILE"
@@ -176,74 +175,32 @@ find_devices() {
 contact_exists() {
   [ -z "$CONTACT" ] && return 0
 
-  # 去掉首尾空格和不可见字符。
-  # 用户从别处复制名字时经常带尾随空格，SQL 等值查询会因此匹配不上。
-  want=$(printf '%s' "$CONTACT" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/\r//g')
-
-  # ---------- 方案一：--where 精确查询 ----------
+  # 主路径：--where 走 SQL 等值查询，带引号能保证不误匹配前缀/后缀
   hit=$(content query \
     --uri content://com.android.contacts/data \
     --projection "display_name" \
-    --where "display_name='$want'" 2>/dev/null)
+    --where "display_name='$CONTACT'" 2>/dev/null)
 
+  # 还得再核一次：某些 ROM 会忽略 --where 直接返回全部，
+  # 所以输出里必须出现完整的一整行结尾才算命中
   if [ -n "$hit" ]; then
-    if printf '%s\n' "$hit" | sed -e 's/^.*display_name=//' | grep -Fxq "$want"; then
-      log "通讯录校验通过（精确查询）"
+    if printf '%s\n' "$hit" | sed -e 's/^.*display_name=//' | grep -Fxq "$CONTACT"; then
       return 0
     fi
   fi
 
-  # ---------- 方案二：全量扫描，逐行整行比对 ----------
-  all=$(content query \
+  # 兜底：全量扫，逐行取 display_name 的值做整行相等比较
+  found=$(content query \
     --uri content://com.android.contacts/data \
-    --projection "display_name" 2>/dev/null)
+    --projection "display_name" 2>/dev/null \
+    | sed -e 's/^.*display_name=//' \
+    | grep -Fx "$CONTACT")
 
-  if [ -n "$all" ]; then
-    if printf '%s\n' "$all" | sed -e 's/^.*display_name=//' | grep -Fxq "$want"; then
-      log "通讯录校验通过（全量扫描）"
-      return 0
-    fi
-
-    # ---------- 方案三：忽略大小写的整行比对 ----------
-    if printf '%s\n' "$all" | sed -e 's/^.*display_name=//' | grep -Fxiq "$want"; then
-      log "通讯录校验通过（忽略大小写）"
-      return 0
-    fi
-
-    # ---------- 方案四：包含匹配兜底 ----------
-    # 有些系统的 display_name 会带上账号前缀，比如 "张三 (Google)"，
-    # 精确比对会失败，包含匹配能救回来。
-    if printf '%s\n' "$all" | sed -e 's/^.*display_name=//' | grep -Fq "$want"; then
-      log "通讯录校验通过（包含匹配）"
-      return 0
-    fi
-  fi
-
-  # ---------- 方案五：从原始输出里粗暴找一遍 ----------
-  # 有些 ROM 的 content query 输出格式不是 display_name=xxx，
-  # 而是 Row: 0 display_name=xxx 或者带引号的形式，这里直接全文找。
-  if [ -n "$all" ] || [ -n "$hit" ]; then
-    combined="$all
-$hit"
-    if printf '%s' "$combined" | grep -Fq "$want"; then
-      log "通讯录校验通过（全文匹配）"
-      return 0
-    fi
-  fi
-
-  # 全部失败，把现场记下来
-  log "通讯录校验失败 联系人=[$want] 精确查询返回${#hit}字节 全量扫描返回${#all}字节"
-  if [ -z "$all" ] && [ -z "$hit" ]; then
-    log "  两次查询都是空的，说明这台机器读不到通讯录数据"
-  else
-    log "  查询有返回但没匹配上，可能是名字不完全一致"
-    printf '%s\n' "$all" | sed -e 's/^.*display_name=//' | head -3 | while IFS= read -r line; do
-      [ -n "$line" ] && log "  通讯录里有: [$line]"
-    done
-  fi
+  [ -n "$found" ] && return 0
+  # 走到这里说明两次查询都没命中，记下 CONTACT 便于排查（不是名字错了就是读取失败）
+  log "contact_exists 失败，CONTACT=[$CONTACT] where_hit_len=${#hit}"
   return 1
 }
-
 # ---------- 装回面具 ----------
 revive() {
   # ---------- 重入保护 ----------
@@ -285,60 +242,23 @@ revive() {
 
   out=$(su -c "pm install -r -d -g --user 0 '$tmp'" </dev/null 2>&1)
   log "install: $out"
+  rm -f "$tmp" 2>/dev/null
 
   case "$out" in
     *Success*)
       log "安装成功"
+      # 装成功立刻打时间戳，别等 monkey 拉起来再打，
+      # 中间这段时间正好是 PackageManager 还没刷新、最容易误判的窗口。
+      date +%s > "$WORK/.revive_guard" 2>/dev/null
       ;;
     *)
-      # 反复装卸很多次之后，/data/app 下可能留着半残的目录，
-      # 直接重装会一直失败。这里先彻底卸干净再装一次。
-      log "首次安装失败，清理残留后重试"
-      su -c "pm uninstall --user 0 '$pkg'" </dev/null >> "$LOG" 2>&1
-      bb sleep 1 2>/dev/null || sleep 1
-
-      out2=$(su -c "pm install -r -d -g -f --user 0 '$tmp'" </dev/null 2>&1)
-      log "install(重试): $out2"
-
-      case "$out2" in
-        *Success*)
-          log "重装成功"
-          ;;
-        *)
-          log "FAIL 重装也失败，放弃本轮"
-          rm -f "$tmp" 2>/dev/null
-          return 1
-          ;;
-      esac
+      log "FAIL 安装失败"
+      return 1
       ;;
   esac
 
-  rm -f "$tmp" 2>/dev/null
-
-  # 装成功立刻打时间戳，别等拉起再打，
-  # 中间这段时间正好是 PackageManager 还没刷新、最容易误判的窗口。
-  date +%s > "$WORK/.revive_guard" 2>/dev/null
-
-  # 装完不能只 sleep 一秒就拉起。
-  # 反复装卸之后 PackageManager 的缓存刷新会更慢，包还没注册就去 am start，
-  # 会一直失败。这里轮询最多等 8 秒，确认包真的在列表里再往下走。
-  waited=0
-  while [ "$waited" -lt 16 ]; do
-    if pkg_installed; then
-      log "包已注册（等了 $((waited * 5 / 10)) 秒）"
-      break
-    fi
-    bb sleep 0.5 2>/dev/null || sleep 1
-    waited=$((waited + 1))
-  done
-  if ! pkg_installed; then
-    log "FAIL pm install 说成功了，但包里一直看不到，清理安装标记"
-    rm -f "$WORK/.ksu_install" "$WORK/.revive_guard" 2>/dev/null
-    return 1
-  fi
-
-  # 再给系统半秒做 dexopt 收尾
-  bb sleep 0.5 2>/dev/null || sleep 1
+  # 稍微等一下让 PackageManager 缓存刷新，再拉起，避免拉起时包还没注册
+  bb sleep 1 2>/dev/null || sleep 1
 
   # ---------- 拉起面具 ----------
   # 依次尝试三种方式，前一种成功就不走后一种。
@@ -347,55 +267,34 @@ revive() {
   #   3. monkey           最后的兜底，会发随机事件但至少能起来
   launched=0
 
-  # 判断 am start 是否成功。
-  # 只看 "Starting:" 或者 "Warning: Activity not started" 这种明确成功标志，
-  # 不再用 "不含 Error 就当成功" 这种松判断，那样会把半失败当成功。
-  launch_ok() {
-    case "$1" in
-      *Error*|*error*|*Exception*|*does\ not\ exist*|*"Unable to"*|*"Permission Denial"*) return 1 ;;
-      *Starting:*|*"Activity not started"*|*"Warning: Intent"*) return 0 ;;
-      *) return 1 ;;
-    esac
-  }
-
-  attempt=0
-  while [ "$attempt" -lt 3 ] && [ "$launched" = "0" ]; do
-    attempt=$((attempt + 1))
-
-    start_out=$(su -c "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p '$pkg' --user 0" </dev/null 2>&1)
-    log "am start -p 第${attempt}次: $start_out"
-    if launch_ok "$start_out"; then
-      launched=1
-      break
-    fi
-
-    # 用组件名直接启动，绕过包名解析
-    act=$(su -c "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER '$pkg'" </dev/null 2>&1 | tail -n 1 | tr -d '\r')
-    case "$act" in
-      */*)
-        log "resolve-activity: $act"
-        start2=$(su -c "am start -n '$act' --user 0" </dev/null 2>&1)
-        log "am start -n 第${attempt}次: $start2"
-        if launch_ok "$start2"; then
-          launched=1
-          break
-        fi
-        ;;
-    esac
-
-    # 两次都失败，等一会儿再整轮重试
-    if [ "$attempt" -lt 3 ]; then
-      log "本轮启动失败，1 秒后重试"
-      bb sleep 1 2>/dev/null || sleep 1
-    fi
-  done
+  start_out=$(su -c "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p '$pkg' --user 0" </dev/null 2>&1)
+  log "am start -p: $start_out"
+  case "$start_out" in
+    *Error*|*error*|*Exception*|*does\ not\ exist*) : ;;
+    *) launched=1 ;;
+  esac
 
   if [ "$launched" = "0" ]; then
-    log "am start 三轮都失败，退回 monkey 兜底"
+    act=$(su -c "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER '$pkg'" </dev/null 2>&1 | tail -n 1 | tr -d '\r')
+    log "resolve-activity: $act"
+    case "$act" in
+      */*)
+        start2=$(su -c "am start -n '$act' --user 0" </dev/null 2>&1)
+        log "am start -n: $start2"
+        case "$start2" in
+          *Error*|*error*|*Exception*) : ;;
+          *) launched=1 ;;
+        esac
+        ;;
+    esac
+  fi
+
+  if [ "$launched" = "0" ]; then
+    log "am start 两次都失败，退回 monkey 兜底"
     su -c "monkey -p '$pkg' -c android.intent.category.LAUNCHER 1 --pct-syskeys 0 --pct-nav 0" </dev/null >> "$LOG" 2>&1
   fi
 
-  log "已拉起面具（launched=$launched）"
+  log "已拉起面具"
 
   return 0
 }
@@ -605,7 +504,7 @@ ksu_cycle() {
       guard=$(cat "$WORK/.revive_guard" 2>/dev/null)
       if [ -n "$guard" ]; then
         now_s=$(date +%s)
-        if [  -lt 15 ]; then
+        if [ $((now_s - guard)) -lt 12 ]; then
           continue
         fi
       fi
@@ -713,7 +612,6 @@ if [ -z "$DEVICES" ]; then
   DEVICES=""
 fi
 log "监听设备: $(echo $DEVICES | tr '\n' ' ')"
-log "配置: target=[$TARGET] contact=[$CONTACT]"
 
 # ---------- 后台刷新前台 ----------
 refresh_fg &
@@ -853,14 +751,9 @@ while true; do
           fi
 
           # ---------- 2. 再回退到隐形唤回配置 ----------
-          # 设了目标应用就只在该应用内生效；
-          # 没设（target 为空）时在任意界面都能用手势唤回，
-          # 否则没填目标的人永远触发不了。
-          if [ -n "$TARGET" ] && [ "$fg" != "$TARGET" ]; then
-            continue
-          fi
+          [ "$fg" != "$TARGET" ] && continue
 
-          log "隐形唤回手势 时长=${dur}ms 前台=$fg"
+          log "隐形唤回手势 时长=${dur}ms"
 
           if [ "$MODE" = "long" ]; then
             if [ "$dur" -ge "$LONGMS" ]; then
