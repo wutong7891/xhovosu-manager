@@ -175,32 +175,74 @@ find_devices() {
 contact_exists() {
   [ -z "$CONTACT" ] && return 0
 
-  # 主路径：--where 走 SQL 等值查询，带引号能保证不误匹配前缀/后缀
+  # 去掉首尾空格和不可见字符。
+  # 用户从别处复制名字时经常带尾随空格，SQL 等值查询会因此匹配不上。
+  want=$(printf '%s' "$CONTACT" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/\r//g')
+
+  # ---------- 方案一：--where 精确查询 ----------
   hit=$(content query \
     --uri content://com.android.contacts/data \
     --projection "display_name" \
-    --where "display_name='$CONTACT'" 2>/dev/null)
+    --where "display_name='$want'" 2>/dev/null)
 
-  # 还得再核一次：某些 ROM 会忽略 --where 直接返回全部，
-  # 所以输出里必须出现完整的一整行结尾才算命中
   if [ -n "$hit" ]; then
-    if printf '%s\n' "$hit" | sed -e 's/^.*display_name=//' | grep -Fxq "$CONTACT"; then
+    if printf '%s\n' "$hit" | sed -e 's/^.*display_name=//' | grep -Fxq "$want"; then
+      log "通讯录校验通过（精确查询）"
       return 0
     fi
   fi
 
-  # 兜底：全量扫，逐行取 display_name 的值做整行相等比较
-  found=$(content query \
+  # ---------- 方案二：全量扫描，逐行整行比对 ----------
+  all=$(content query \
     --uri content://com.android.contacts/data \
-    --projection "display_name" 2>/dev/null \
-    | sed -e 's/^.*display_name=//' \
-    | grep -Fx "$CONTACT")
+    --projection "display_name" 2>/dev/null)
 
-  [ -n "$found" ] && return 0
-  # 走到这里说明两次查询都没命中，记下 CONTACT 便于排查（不是名字错了就是读取失败）
-  log "contact_exists 失败，CONTACT=[$CONTACT] where_hit_len=${#hit}"
+  if [ -n "$all" ]; then
+    if printf '%s\n' "$all" | sed -e 's/^.*display_name=//' | grep -Fxq "$want"; then
+      log "通讯录校验通过（全量扫描）"
+      return 0
+    fi
+
+    # ---------- 方案三：忽略大小写的整行比对 ----------
+    if printf '%s\n' "$all" | sed -e 's/^.*display_name=//' | grep -Fxiq "$want"; then
+      log "通讯录校验通过（忽略大小写）"
+      return 0
+    fi
+
+    # ---------- 方案四：包含匹配兜底 ----------
+    # 有些系统的 display_name 会带上账号前缀，比如 "张三 (Google)"，
+    # 精确比对会失败，包含匹配能救回来。
+    if printf '%s\n' "$all" | sed -e 's/^.*display_name=//' | grep -Fq "$want"; then
+      log "通讯录校验通过（包含匹配）"
+      return 0
+    fi
+  fi
+
+  # ---------- 方案五：从原始输出里粗暴找一遍 ----------
+  # 有些 ROM 的 content query 输出格式不是 display_name=xxx，
+  # 而是 Row: 0 display_name=xxx 或者带引号的形式，这里直接全文找。
+  if [ -n "$all" ] || [ -n "$hit" ]; then
+    combined="$all
+$hit"
+    if printf '%s' "$combined" | grep -Fq "$want"; then
+      log "通讯录校验通过（全文匹配）"
+      return 0
+    fi
+  fi
+
+  # 全部失败，把现场记下来
+  log "通讯录校验失败 联系人=[$want] 精确查询返回${#hit}字节 全量扫描返回${#all}字节"
+  if [ -z "$all" ] && [ -z "$hit" ]; then
+    log "  两次查询都是空的，说明这台机器读不到通讯录数据"
+  else
+    log "  查询有返回但没匹配上，可能是名字不完全一致"
+    printf '%s\n' "$all" | sed -e 's/^.*display_name=//' | head -3 | while IFS= read -r line; do
+      [ -n "$line" ] && log "  通讯录里有: [$line]"
+    done
+  fi
   return 1
 }
+
 # ---------- 装回面具 ----------
 revive() {
   # ---------- 重入保护 ----------
